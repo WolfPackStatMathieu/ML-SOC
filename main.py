@@ -36,7 +36,7 @@ from src.features.build_features import build_features
 from src.models.train_and_evaluate import train_and_evaluate_models
 from sklearn.model_selection import train_test_split
 from src.features.build_features import filtrage_colonnes
-
+from src.models.ml_models.random_forest import model_random_forest
 
 def print_with_padding(message):
     print(f"\n{'-'*10} {message} {'-'*10}\n")
@@ -77,9 +77,26 @@ X = filtrage_colonnes(csic_data)
 X, y = build_features(csic_data)
 
 # Split the dataset into training and testing sets
-# print("computing...")
-# x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
-# print("Done!")
+print("computing train and test split...")
+x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
+print("Done!")
 # #
 # ## Train and evaluate models
 # train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params)
+# Reset index for testing set
+# Display the unique values in the training target variable and its name
+print(y_tr.unique())
+print(y_tr.name)
+
+x_ts = x_ts.reset_index(drop=True)
+y_ts = y_ts.reset_index(drop=True)
+print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
+
+
+print_with_padding("RANDOM FOREST")
+model_random_forest(x_tr, y_tr, x_ts, y_ts)
+
+print_with_padding("K-NEAREST NEIGHBOR")
+
+
+
