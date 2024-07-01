@@ -77,9 +77,9 @@ X = filtrage_colonnes(csic_data)
 X, y = build_features(csic_data)
 
 # Split the dataset into training and testing sets
-print("computing...")
-x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
-print("Done!")
-#
-## Train and evaluate models
-train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params)
+# print("computing...")
+# x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
+# print("Done!")
+# #
+# ## Train and evaluate models
+# train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params)
