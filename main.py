@@ -21,7 +21,7 @@ modèles de machine learning et de deep learning.
 1. Lecture de la configuration depuis config.yaml.
 2. Chargement des données à partir du fichier CSV spécifié dans la configuration.
 3. Construction des caractéristiques à partir des données brutes.
-4. Division des données en ensembles d'entraînement et de test.
+4. Division des données en ensembles d'entraînement et detest.
 5. Entraînement et évaluation des modèles.
 
 Les résultats des évaluations incluent les métriques de performance telles que MAE,
@@ -33,10 +33,11 @@ import seaborn as sns
 from src.config.load_config import load_config
 from src.data.load_data import load_csv_data
 from src.features.build_features import build_features
-from src.models.train_and_evaluate import train_and_evaluate_models
+
 from sklearn.model_selection import train_test_split
 from src.features.build_features import filtrage_colonnes
 from src.models.ml_models.random_forest import model_random_forest
+
 
 def print_with_padding(message):
     print(f"\n{'-'*10} {message} {'-'*10}\n")
@@ -97,6 +98,5 @@ print_with_padding("RANDOM FOREST")
 model_random_forest(x_tr, y_tr, x_ts, y_ts)
 
 print_with_padding("K-NEAREST NEIGHBOR")
-
 
 
