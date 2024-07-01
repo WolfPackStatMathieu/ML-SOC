@@ -38,6 +38,7 @@ from src.features.build_features import build_features
 from sklearn.model_selection import train_test_split
 from src.features.build_features import filtrage_colonnes
 from src.models.ml_models.random_forest import model_random_forest
+from src.models.ml_models.knn import model_knn
 
 
 def print_with_padding(message):
@@ -103,4 +104,4 @@ print_with_padding("RANDOM FOREST")
 model_random_forest(x_tr, y_tr, x_ts, y_ts)
 
 print_with_padding("K-NEAREST NEIGHBOR")
-
+model_knn(x_tr, y_tr, x_ts, y_ts)
