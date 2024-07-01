@@ -1,9 +1,0 @@
-scikit-learn
-tensorflow
-numpy
-pandas
-seaborn
-matplotlib
-eli5
-xgboost
-
