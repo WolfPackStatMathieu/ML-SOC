@@ -39,6 +39,7 @@ from sklearn.model_selection import train_test_split
 from src.features.build_features import filtrage_colonnes
 from src.models.ml_models.random_forest import model_random_forest
 from src.models.ml_models.knn import model_knn
+from src.models.ml_models.decision_tree import model_decision_tree
 
 
 def print_with_padding(message):
@@ -100,8 +101,11 @@ for k in range(np.unique(y_ts).size):
     print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
 
 
-print_with_padding("RANDOM FOREST")
-model_random_forest(x_tr, y_tr, x_ts, y_ts)
+#print_with_padding("RANDOM FOREST")
+#model_random_forest(x_tr, y_tr, x_ts, y_ts)
 
-print_with_padding("K-NEAREST NEIGHBOR")
-model_knn(x_tr, y_tr, x_ts, y_ts)
+#print_with_padding("K-NEAREST NEIGHBOR")
+#model_knn(x_tr, y_tr, x_ts, y_ts)
+
+print_with_padding("DECISION TREE")
+model_decision_tree(x_tr, y_tr, x_ts, y_ts)
