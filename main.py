@@ -28,7 +28,8 @@ Les résultats des évaluations incluent les métriques de performance telles qu
 accuracy, precision, recall, F1 score, ROC AUC, et une matrice de confusion pour chaque modèle.
 """
 
-
+import pandas as pd
+import numpy as np
 import seaborn as sns
 from src.config.load_config import load_config
 from src.data.load_data import load_csv_data
@@ -86,17 +87,20 @@ print("Done!")
 # train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params)
 # Reset index for testing set
 # Display the unique values in the training target variable and its name
+y_tr = pd.Series(y_tr)
+
 print(y_tr.unique())
 print(y_tr.name)
 
 x_ts = x_ts.reset_index(drop=True)
-y_ts = y_ts.reset_index(drop=True)
-print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
+y_ts = pd.Series(y_ts).reset_index(drop=True)
+# Display mean of features for each class in the testing set
+for k in range(np.unique(y_ts).size):
+    print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
 
 
 print_with_padding("RANDOM FOREST")
 model_random_forest(x_tr, y_tr, x_ts, y_ts)
 
 print_with_padding("K-NEAREST NEIGHBOR")
-
 
