@@ -1,10 +1,11 @@
 """
 Module for training, evaluating, and visualizing a Recurrent Neural Network (RNN) model.
 
-This module provides functions to train a Recurrent Neural Network classifier, evaluate its performance on a test set,
-and visualize the results using a confusion matrix. It includes the following functions:
+This module provides functions to train a Recurrent Neural Network classifier,
+evaluate its performance on a test set, and visualize the results using a confusion matrix. It includes the following functions:
 
 - encode_labels: Encodes labels for binary classification.
+- build_rnn_model: Builds a Keras RNN model.
 - train_rnn: Trains the RNN model.
 - evaluate_rnn_model: Evaluates the trained model and prints various performance metrics.
 - plot_confusion_matrix_rnn: Plots the confusion matrix for the model predictions.
@@ -22,7 +23,7 @@ X, y = ...  # Load your data here
 x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 
 # Train, evaluate, and plot the RNN model
-model_rnn(x_tr, y_tr, x_ts, y_ts)
+model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)
 """
 
 import numpy as np
@@ -32,7 +33,7 @@ import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report, confusion_matrix
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import SimpleRNN, Dense
+from tensorflow.keras.layers import SimpleRNN, Dense, Input
 from tensorflow.keras.optimizers import Adam
 
 def encode_labels(y_train, y_test):
@@ -51,28 +52,42 @@ def encode_labels(y_train, y_test):
     y_test_encoded = label_encoder.transform(y_test)
     return y_train_encoded, y_test_encoded
 
-def train_rnn(x_train, y_train, input_shape, learning_rate=0.001, epochs=50, batch_size=32):
+def build_rnn_model(input_shape, units=50, activation='relu', learning_rate=0.001):
     """
-    Train a Recurrent Neural Network (RNN) classifier on the provided training data.
+    Build a Keras RNN model.
+
+    Parameters:
+    input_shape (tuple): Shape of the input data.
+    units (int): Number of units in the RNN layer.
+    activation (str): Activation function for the RNN layer.
+    learning_rate (float): Learning rate for the optimizer.
+
+    Returns:
+    Sequential: Compiled Keras RNN model.
+    """
+    model = Sequential()
+    model.add(Input(shape=input_shape))
+    model.add(SimpleRNN(units, activation=activation))
+    model.add(Dense(1, activation='sigmoid'))
+    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
+def train_rnn(x_train, y_train, rnn_params):
+    """
+    Train a Recurrent Neural Network (RNN) classifier.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Encoded target variable for training.
-    input_shape (tuple): Input shape for the RNN model.
-    learning_rate (float): Learning rate for the optimizer.
-    epochs (int): Number of epochs for training.
-    batch_size (int): Batch size for training.
+    rnn_params (dict): Dictionary with parameters for building and training the RNN model.
 
     Returns:
     Sequential: Trained RNN model.
     """
-    rnn_model = Sequential()
-    rnn_model.add(SimpleRNN(50, input_shape=input_shape, activation='relu'))
-    rnn_model.add(Dense(units=1, activation='sigmoid'))  # Adjust units and activation based on your task
-
-    rnn_model.compile(optimizer=Adam(learning_rate=learning_rate), loss='binary_crossentropy', metrics=['accuracy'])
-    rnn_model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=0.2)
-    return rnn_model
+    input_shape = (x_train.shape[1], 1)
+    model = build_rnn_model(input_shape, units=rnn_params['units'], activation=rnn_params['activation'], learning_rate=rnn_params['learning_rate'])
+    model.fit(x_train, y_train, epochs=rnn_params['epochs'], batch_size=rnn_params['batch_size'], verbose=1)
+    return model
 
 def evaluate_rnn_model(model, x_test, y_test):
     """
@@ -128,26 +143,27 @@ def plot_confusion_matrix_rnn(y_test, predictions, labels=None, filename="confus
     plt.savefig(filename)
     plt.close()
 
-def model_rnn(x_train, y_train, x_test, y_test):
+def model_rnn(x_train, y_train, x_test, y_test, rnn_params):
     """
     Train, evaluate, and plot the RNN model.
 
-    This function trains a Recurrent Neural Network classifier on the training data, evaluates it on the test data,
-    and plots the confusion matrix.
+    This function trains a Recurrent Neural Network classifier on the training data,
+    evaluates it on the test data, and plots the confusion matrix.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
+    rnn_params (dict): Dictionary with parameters for building and training the RNN model.
     """
     y_train_encoded, y_test_encoded = encode_labels(y_train, y_test)
-    input_shape = (x_train.shape[1], 1)
     x_train_reshaped = np.expand_dims(x_train, axis=2)
     x_test_reshaped = np.expand_dims(x_test, axis=2)
-    model = train_rnn(x_train_reshaped, y_train_encoded, input_shape)
+    
+    model = train_rnn(x_train_reshaped, y_train_encoded, rnn_params)
     predictions = evaluate_rnn_model(model, x_test_reshaped, y_test_encoded)
     plot_confusion_matrix_rnn(y_test_encoded, predictions)
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
-# model_rnn(x_tr, y_tr, x_ts, y_ts)
+# model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)

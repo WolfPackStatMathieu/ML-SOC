@@ -105,8 +105,10 @@ for k in range(np.unique(y_ts).size):
     print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
 
 
+print_with_padding("MACHINE LEARNING MODELS")
+
 print_with_padding("RANDOM FOREST")
-#model_random_forest(x_tr, y_tr, x_ts, y_ts)
+# model_random_forest(x_tr, y_tr, x_ts, y_ts)
 
 print_with_padding("K-NEAREST NEIGHBOR")
 #model_knn(x_tr, y_tr, x_ts, y_ts)
@@ -116,10 +118,10 @@ print_with_padding("DECISION TREE")
 
 
 print_with_padding("Logistic Regression")
-model_params = {
-    'random_state': 42,
-    'max_iter': 1000
-}
+# model_params = {
+#     'random_state': 42,
+#     'max_iter': 1000
+# }
 # model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params)
 
 print_with_padding("Support Vector Machine (SVM)")
@@ -136,6 +138,6 @@ print_with_padding("Naïve Bayes")
 
 print_with_padding("DEEP LEARNING")
 
-print_with_padding("RNN")
-# model_rnn(x_tr, y_tr, x_ts, y_ts)
+print_with_padding("Recurrent Neural Network")
+model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])
 
