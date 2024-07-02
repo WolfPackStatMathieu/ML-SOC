@@ -27,7 +27,7 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_params = {'random_state': 42, 'max_iter': 1000}
 model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params)
 """
-
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
