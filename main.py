@@ -127,7 +127,6 @@ model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
 
 
 print_with_padding("DEEP LEARNING")
-
 print_with_padding("RECURRENT NEURAL NETWORK")
 
 model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])
