@@ -52,6 +52,7 @@ from src.utils.content_utils import (
 )
 from sklearn.preprocessing import LabelEncoder
 
+
 def filtrage_colonnes(data):
     """
     Preprocess and extract features from the raw data.
@@ -61,7 +62,7 @@ def filtrage_colonnes(data):
 
     Returns:
     pd.DataFrame: The features.
-    
+   
     """
     feature_names = [
         "Unnamed: 0",
@@ -85,6 +86,7 @@ def filtrage_colonnes(data):
 
     X = data[feature_names]
     return X
+
 
 def build_features(data):
     """
@@ -187,7 +189,8 @@ def build_features(data):
         X[feature] = X["content"].apply(lambda x: apply_to_content(x, func))
 
     # Encode categorical features
-    categorical_features = ["Method", "host", "cookie", "Accept", "content", "URL", "classification"]
+    categorical_features = ["Method", "host", "cookie", "Accept", "content",
+                            "URL", "classification"]
     le = LabelEncoder()
     for feature in categorical_features:
         X[feature] = le.fit_transform(X[feature].astype(str))
