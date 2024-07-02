@@ -1,0 +1,153 @@
+"""
+Module for training, evaluating, and visualizing a Recurrent Neural Network (RNN) model.
+
+This module provides functions to train a Recurrent Neural Network classifier, evaluate its performance on a test set,
+and visualize the results using a confusion matrix. It includes the following functions:
+
+- encode_labels: Encodes labels for binary classification.
+- train_rnn: Trains the RNN model.
+- evaluate_rnn_model: Evaluates the trained model and prints various performance metrics.
+- plot_confusion_matrix_rnn: Plots the confusion matrix for the model predictions.
+- model_rnn: High-level function to train, evaluate, and plot the RNN model.
+
+Example usage:
+--------------
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+# Assume X and y are your feature matrix and target vector respectively
+X, y = ...  # Load your data here
+
+# Split the dataset into training and testing sets
+x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
+
+# Train, evaluate, and plot the RNN model
+model_rnn(x_tr, y_tr, x_ts, y_ts)
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report, confusion_matrix
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import SimpleRNN, Dense
+from tensorflow.keras.optimizers import Adam
+
+def encode_labels(y_train, y_test):
+    """
+    Encode labels for binary classification.
+
+    Parameters:
+    y_train (Series): Target variable for training.
+    y_test (Series): Target variable for testing.
+
+    Returns:
+    y_train_encoded, y_test_encoded: Encoded labels for training and testing.
+    """
+    label_encoder = LabelEncoder()
+    y_train_encoded = label_encoder.fit_transform(y_train)
+    y_test_encoded = label_encoder.transform(y_test)
+    return y_train_encoded, y_test_encoded
+
+def train_rnn(x_train, y_train, input_shape, learning_rate=0.001, epochs=50, batch_size=32):
+    """
+    Train a Recurrent Neural Network (RNN) classifier on the provided training data.
+
+    Parameters:
+    x_train (DataFrame): Features for training.
+    y_train (Series): Encoded target variable for training.
+    input_shape (tuple): Input shape for the RNN model.
+    learning_rate (float): Learning rate for the optimizer.
+    epochs (int): Number of epochs for training.
+    batch_size (int): Batch size for training.
+
+    Returns:
+    Sequential: Trained RNN model.
+    """
+    rnn_model = Sequential()
+    rnn_model.add(SimpleRNN(50, input_shape=input_shape, activation='relu'))
+    rnn_model.add(Dense(units=1, activation='sigmoid'))  # Adjust units and activation based on your task
+
+    rnn_model.compile(optimizer=Adam(learning_rate=learning_rate), loss='binary_crossentropy', metrics=['accuracy'])
+    rnn_model.fit(x_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=0.2)
+    return rnn_model
+
+def evaluate_rnn_model(model, x_test, y_test):
+    """
+    Evaluate the trained RNN model on the test data and print performance metrics.
+
+    Parameters:
+    model (Sequential): Trained RNN model.
+    x_test (DataFrame): Features for testing.
+    y_test (Series): Encoded target variable for testing.
+
+    Returns:
+    ndarray: Predictions made by the model on the test data.
+    """
+    accuracy = model.evaluate(x_test, y_test, verbose=0)[1]
+    predictions = (model.predict(x_test) > 0.5).astype("int32")
+    
+    # Évaluer le modèle
+    print(f'Accuracy: {accuracy}')
+    print('MAE:', mean_absolute_error(y_test, predictions))
+    print('Precision:', precision_score(y_test, predictions, average='weighted'))
+    print('Recall:', recall_score(y_test, predictions, average='weighted'))
+    print('F1:', f1_score(y_test, predictions, average='weighted'))
+    print('ROC AUC:', roc_auc_score(y_test, predictions, average='weighted'))
+    error_rnn = (predictions != y_test).mean()
+    print(f"Test error: {error_rnn:.1%}")
+
+    # Afficher le rapport de classification
+    print(classification_report(y_test, predictions, target_names=['Normal (class 0)', 'Anomalous (class 1)']))
+    
+    return predictions
+
+def plot_confusion_matrix_rnn(y_test, predictions, labels=None, filename="confusion_matrix_rnn.png"):
+    """
+    Plot the confusion matrix for the RNN model predictions and save it to a file.
+
+    Parameters:
+    y_test (Series): True labels for the test data.
+    predictions (ndarray): Predicted labels by the model.
+    labels (list): List of label names for the confusion matrix.
+    filename (str): Name of the file to save the plot.
+    """
+    if labels is None:
+        labels = ["Normal", "Anomalous"]
+        
+    cm = confusion_matrix(y_test, predictions)
+    cm = pd.DataFrame(cm, index=['0', '1'], columns=['0', '1'])
+
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(cm, cmap="Blues", linecolor='black', linewidth=1, annot=True, fmt='', xticklabels=labels, yticklabels=labels)
+    plt.title("Recurrent Neural Network")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.savefig(filename)
+    plt.close()
+
+def model_rnn(x_train, y_train, x_test, y_test):
+    """
+    Train, evaluate, and plot the RNN model.
+
+    This function trains a Recurrent Neural Network classifier on the training data, evaluates it on the test data,
+    and plots the confusion matrix.
+
+    Parameters:
+    x_train (DataFrame): Features for training.
+    y_train (Series): Target variable for training.
+    x_test (DataFrame): Features for testing.
+    y_test (Series): Target variable for testing.
+    """
+    y_train_encoded, y_test_encoded = encode_labels(y_train, y_test)
+    input_shape = (x_train.shape[1], 1)
+    x_train_reshaped = np.expand_dims(x_train, axis=2)
+    x_test_reshaped = np.expand_dims(x_test, axis=2)
+    model = train_rnn(x_train_reshaped, y_train_encoded, input_shape)
+    predictions = evaluate_rnn_model(model, x_test_reshaped, y_test_encoded)
+    plot_confusion_matrix_rnn(y_test_encoded, predictions)
+
+# Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
+# model_rnn(x_tr, y_tr, x_ts, y_ts)

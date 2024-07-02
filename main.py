@@ -44,6 +44,7 @@ from src.models.ml_models.logistic_regression import model_logistic_regression
 from src.models.ml_models.svm import model_svm
 from src.models.ml_models.naive_bayes import model_naive_bayes
 
+from src.models.dl_models.rnn import model_rnn
 
 def print_with_padding(message):
     print(f"\n{'-'*10} {message} {'-'*10}\n")
@@ -132,4 +133,9 @@ print_with_padding("Support Vector Machine (SVM)")
 print_with_padding("Naïve Bayes")
 # model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
 
+
+print_with_padding("DEEP LEARNING")
+
+print_with_padding("RNN")
+# model_rnn(x_tr, y_tr, x_ts, y_ts)
 
