@@ -28,6 +28,7 @@ Les résultats des évaluations incluent les métriques de performance telles qu
 accuracy, precision, recall, F1 score, ROC AUC, et une matrice de confusion pour chaque modèle.
 """
 
+import time
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -45,10 +46,7 @@ from src.models.ml_models.svm import model_svm
 from src.models.ml_models.naive_bayes import model_naive_bayes
 
 from src.models.dl_models.rnn import model_rnn
-
-def print_with_padding(message):
-    print(f"\n{'-'*10} {message} {'-'*10}\n")
-
+from src.utils.print_utils import print_with_padding
 
 # ----------------CONFIG ------------------
 print_with_padding("READ config.yaml")
@@ -61,11 +59,8 @@ config = load_config()
 model_params = {model: config["models"][model] for model in config["models"]}
 CSIC_FILEPATH = config["data_path"]
 
-
-# TODO mettre sur Minio
 print_with_padding("CHARGEMENT DES DONNEES")
 print_with_padding("READ CSV")
-
 
 csic_data = load_csv_data(CSIC_FILEPATH)
 print("Done!")
@@ -107,37 +102,32 @@ for k in range(np.unique(y_ts).size):
 
 print_with_padding("MACHINE LEARNING MODELS")
 
+# Timing and running models
 print_with_padding("RANDOM FOREST")
-# model_random_forest(x_tr, y_tr, x_ts, y_ts)
+model_random_forest(x_tr, y_tr, x_ts, y_ts)
+
 
 print_with_padding("K-NEAREST NEIGHBOR")
-#model_knn(x_tr, y_tr, x_ts, y_ts)
+model_knn(x_tr, y_tr, x_ts, y_ts)
+
 
 print_with_padding("DECISION TREE")
-#model_decision_tree(x_tr, y_tr, x_ts, y_ts)
+model_decision_tree(x_tr, y_tr, x_ts, y_ts)
 
 
-print_with_padding("Logistic Regression")
-# model_params = {
-#     'random_state': 42,
-#     'max_iter': 1000
-# }
-# model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params)
+print_with_padding("LOGISTIC REGRESSION")
+model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params["LogisticRegression"])
 
-print_with_padding("Support Vector Machine (SVM)")
-# model_params = {
-#     'C': 1.0,
-#     'kernel': 'rbf',
-#     'gamma': 'scale'
-# }
-# model_svm(x_tr, y_tr, x_ts, y_ts, model_params)
 
-print_with_padding("Naïve Bayes")
-# model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
+print_with_padding("SUPPORT VECTOR MACHINE (SVM)")
+model_svm(x_tr, y_tr, x_ts, y_ts, model_params["SVC"])
+
+print_with_padding("NAÏVE BAYES")
+model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
 
 
 print_with_padding("DEEP LEARNING")
 
-print_with_padding("Recurrent Neural Network")
-model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])
+print_with_padding("RECURRENT NEURAL NETWORK")
 
+model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])

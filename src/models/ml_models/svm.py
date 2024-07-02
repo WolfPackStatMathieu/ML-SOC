@@ -25,12 +25,23 @@ model_params = {'C': 1.0, 'kernel': 'rbf', 'gamma': 'scale'}
 model_svm(x_tr, y_tr, x_ts, y_ts, model_params)
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.svm import SVC
-from sklearn.metrics import mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report, confusion_matrix
+from sklearn.metrics import (
+    mean_absolute_error,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    classification_report,
+    confusion_matrix,
+)
+
 
 def train_svm(x_train, y_train, **kwargs):
     """
@@ -45,10 +56,11 @@ def train_svm(x_train, y_train, **kwargs):
     SVC: Trained Support Vector Machine model.
     """
     svc_model = SVC(**kwargs)
-    print('Computing....')
+    print("Computing....")
     svc_model.fit(x_train, y_train)
-    print('Done!')
+    print("Done!")
     return svc_model
+
 
 def evaluate_svm_model(model, x_test, y_test):
     """
@@ -65,21 +77,50 @@ def evaluate_svm_model(model, x_test, y_test):
     predictions = model.predict(x_test)
 
     # Évaluer le modèle
-    print('MAE:', mean_absolute_error(y_test, predictions))
-    print('Accuracy:', accuracy_score(y_test, predictions))
-    print('Precision:', precision_score(y_test, predictions, average='weighted', labels=np.unique(predictions)))
-    print('Recall:', recall_score(y_test, predictions, average='weighted', labels=np.unique(predictions)))
-    print('F1:', f1_score(y_test, predictions, average='weighted', labels=np.unique(predictions)))
-    print('ROC AUC:', roc_auc_score(y_test, predictions, average='weighted', labels=np.unique(predictions)))
+    print("MAE:", mean_absolute_error(y_test, predictions))
+    print("Accuracy:", accuracy_score(y_test, predictions))
+    print(
+        "Precision:",
+        precision_score(
+            y_test, predictions, average="weighted", labels=np.unique(predictions)
+        ),
+    )
+    print(
+        "Recall:",
+        recall_score(
+            y_test, predictions, average="weighted", labels=np.unique(predictions)
+        ),
+    )
+    print(
+        "F1:",
+        f1_score(
+            y_test, predictions, average="weighted", labels=np.unique(predictions)
+        ),
+    )
+    print(
+        "ROC AUC:",
+        roc_auc_score(
+            y_test, predictions, average="weighted", labels=np.unique(predictions)
+        ),
+    )
     error_svc = (predictions != y_test).mean()
     print(f"Test error: {error_svc:.1%}")
 
     # Afficher le rapport de classification
-    print(classification_report(y_test, predictions, target_names=['Normal (class 0)', 'Anomalous (class 1)']))
-    
+    print(
+        classification_report(
+            y_test,
+            predictions,
+            target_names=["Normal (class 0)", "Anomalous (class 1)"],
+        )
+    )
+
     return predictions
 
-def plot_confusion_matrix_svm(y_test, predictions, labels=None, filename="confusion_matrix_svm.png"):
+
+def plot_confusion_matrix_svm(
+    y_test, predictions, labels=None, filename="confusion_matrix_svm.png"
+):
     """
     Plot the confusion matrix for the SVM model predictions and save it to a file.
 
@@ -91,17 +132,27 @@ def plot_confusion_matrix_svm(y_test, predictions, labels=None, filename="confus
     """
     if labels is None:
         labels = ["Normal", "Anomalous"]
-        
+
     cm = confusion_matrix(y_test, predictions)
-    cm = pd.DataFrame(cm, index=['0', '1'], columns=['0', '1'])
+    cm = pd.DataFrame(cm, index=["0", "1"], columns=["0", "1"])
 
     plt.figure(figsize=(10, 10))
-    sns.heatmap(cm, cmap="Blues", linecolor='black', linewidth=1, annot=True, fmt='', xticklabels=labels, yticklabels=labels)
+    sns.heatmap(
+        cm,
+        cmap="Blues",
+        linecolor="black",
+        linewidth=1,
+        annot=True,
+        fmt="",
+        xticklabels=labels,
+        yticklabels=labels,
+    )
     plt.title("Support Vector Machine")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.savefig(filename)
     plt.close()
+
 
 def model_svm(x_train, y_train, x_test, y_test, model_params):
     """
@@ -117,9 +168,15 @@ def model_svm(x_train, y_train, x_test, y_test, model_params):
     y_test (Series): Target variable for testing.
     model_params (dict): Dictionary containing model parameters (e.g., C, kernel, gamma).
     """
+    start_time = time.time()
     model = train_svm(x_train, y_train, **model_params)
+    end_time = time.time()
+    print(
+        f"SUPPORT VECTOR MACHINE (SVM) Execution time: {end_time - start_time:.2f} seconds"
+    )
     predictions = evaluate_svm_model(model, x_test, y_test)
     plot_confusion_matrix_svm(y_test, predictions)
+
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
 # model_params = {

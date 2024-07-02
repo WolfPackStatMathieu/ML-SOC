@@ -25,6 +25,7 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_decision_tree(x_tr, y_tr, x_ts, y_ts, random_state=2)
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -117,7 +118,9 @@ def evaluate_decision_tree_model(model, x_test, y_test):
     return predictions
 
 
-def plot_confusion_matrix_dt(y_test, predictions, labels=None, filename="confusion_matrix_dt.png"):
+def plot_confusion_matrix_dt(
+    y_test, predictions, labels=None, filename="confusion_matrix_dt.png"
+):
     """
     Plot the confusion matrix for the Decision Tree model predictions.
 
@@ -165,7 +168,10 @@ def model_decision_tree(x_train, y_train, x_test, y_test, random_state=2):
     y_test (Series): Target variable for testing.
     random_state (int): Random state for reproducibility.
     """
+    start_time = time.time()
     model = train_decision_tree(x_train, y_train, random_state)
+    end_time = time.time()
+    print(f"DECISION TREE Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_decision_tree_model(model, x_test, y_test)
     plot_confusion_matrix_dt(y_test, predictions)
 

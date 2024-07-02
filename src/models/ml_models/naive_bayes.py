@@ -25,6 +25,7 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -166,7 +167,10 @@ def model_naive_bayes(x_train, y_train, x_test, y_test):
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
     """
+    start_time = time.time()
     model = train_naive_bayes(x_train, y_train)
+    end_time = time.time()
+    print(f"NAÏVE BAYES Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_naive_bayes_model(model, x_test, y_test)
     plot_confusion_matrix_nb(y_test, predictions)
 

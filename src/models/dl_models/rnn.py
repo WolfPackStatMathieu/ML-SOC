@@ -2,7 +2,8 @@
 Module for training, evaluating, and visualizing a Recurrent Neural Network (RNN) model.
 
 This module provides functions to train a Recurrent Neural Network classifier,
-evaluate its performance on a test set, and visualize the results using a confusion matrix. It includes the following functions:
+evaluate its performance on a test set, and visualize the results using a confusion matrix.
+It includes the following functions:
 
 - encode_labels: Encodes labels for binary classification.
 - build_rnn_model: Builds a Keras RNN model.
@@ -26,15 +27,26 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report, confusion_matrix
+from sklearn.metrics import (
+    mean_absolute_error,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    classification_report,
+    confusion_matrix,
+)
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import SimpleRNN, Dense, Input
 from tensorflow.keras.optimizers import Adam
+
 
 def encode_labels(y_train, y_test):
     """
@@ -52,7 +64,8 @@ def encode_labels(y_train, y_test):
     y_test_encoded = label_encoder.transform(y_test)
     return y_train_encoded, y_test_encoded
 
-def build_rnn_model(input_shape, units=50, activation='relu', learning_rate=0.001):
+
+def build_rnn_model(input_shape, units=50, activation="relu", learning_rate=0.001):
     """
     Build a Keras RNN model.
 
@@ -68,9 +81,14 @@ def build_rnn_model(input_shape, units=50, activation='relu', learning_rate=0.00
     model = Sequential()
     model.add(Input(shape=input_shape))
     model.add(SimpleRNN(units, activation=activation))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(optimizer=Adam(learning_rate=learning_rate), loss='binary_crossentropy', metrics=['accuracy'])
+    model.add(Dense(1, activation="sigmoid"))
+    model.compile(
+        optimizer=Adam(learning_rate=learning_rate),
+        loss="binary_crossentropy",
+        metrics=["accuracy"],
+    )
     return model
+
 
 def train_rnn(x_train, y_train, rnn_params):
     """
@@ -85,9 +103,21 @@ def train_rnn(x_train, y_train, rnn_params):
     Sequential: Trained RNN model.
     """
     input_shape = (x_train.shape[1], 1)
-    model = build_rnn_model(input_shape, units=rnn_params['units'], activation=rnn_params['activation'], learning_rate=rnn_params['learning_rate'])
-    model.fit(x_train, y_train, epochs=rnn_params['epochs'], batch_size=rnn_params['batch_size'], verbose=1)
+    model = build_rnn_model(
+        input_shape,
+        units=rnn_params["units"],
+        activation=rnn_params["activation"],
+        learning_rate=rnn_params["learning_rate"],
+    )
+    model.fit(
+        x_train,
+        y_train,
+        epochs=rnn_params["epochs"],
+        batch_size=rnn_params["batch_size"],
+        verbose=1,
+    )
     return model
+
 
 def evaluate_rnn_model(model, x_test, y_test):
     """
@@ -103,23 +133,32 @@ def evaluate_rnn_model(model, x_test, y_test):
     """
     accuracy = model.evaluate(x_test, y_test, verbose=0)[1]
     predictions = (model.predict(x_test) > 0.5).astype("int32")
-    
+
     # Évaluer le modèle
-    print(f'Accuracy: {accuracy}')
-    print('MAE:', mean_absolute_error(y_test, predictions))
-    print('Precision:', precision_score(y_test, predictions, average='weighted'))
-    print('Recall:', recall_score(y_test, predictions, average='weighted'))
-    print('F1:', f1_score(y_test, predictions, average='weighted'))
-    print('ROC AUC:', roc_auc_score(y_test, predictions, average='weighted'))
+    print(f"Accuracy: {accuracy}")
+    print("MAE:", mean_absolute_error(y_test, predictions))
+    print("Precision:", precision_score(y_test, predictions, average="weighted"))
+    print("Recall:", recall_score(y_test, predictions, average="weighted"))
+    print("F1:", f1_score(y_test, predictions, average="weighted"))
+    print("ROC AUC:", roc_auc_score(y_test, predictions, average="weighted"))
     error_rnn = (predictions != y_test).mean()
     print(f"Test error: {error_rnn:.1%}")
 
     # Afficher le rapport de classification
-    print(classification_report(y_test, predictions, target_names=['Normal (class 0)', 'Anomalous (class 1)']))
-    
+    print(
+        classification_report(
+            y_test,
+            predictions,
+            target_names=["Normal (class 0)", "Anomalous (class 1)"],
+        )
+    )
+
     return predictions
 
-def plot_confusion_matrix_rnn(y_test, predictions, labels=None, filename="confusion_matrix_rnn.png"):
+
+def plot_confusion_matrix_rnn(
+    y_test, predictions, labels=None, filename="confusion_matrix_rnn.png"
+):
     """
     Plot the confusion matrix for the RNN model predictions and save it to a file.
 
@@ -131,17 +170,27 @@ def plot_confusion_matrix_rnn(y_test, predictions, labels=None, filename="confus
     """
     if labels is None:
         labels = ["Normal", "Anomalous"]
-        
+
     cm = confusion_matrix(y_test, predictions)
-    cm = pd.DataFrame(cm, index=['0', '1'], columns=['0', '1'])
+    cm = pd.DataFrame(cm, index=["0", "1"], columns=["0", "1"])
 
     plt.figure(figsize=(10, 10))
-    sns.heatmap(cm, cmap="Blues", linecolor='black', linewidth=1, annot=True, fmt='', xticklabels=labels, yticklabels=labels)
+    sns.heatmap(
+        cm,
+        cmap="Blues",
+        linecolor="black",
+        linewidth=1,
+        annot=True,
+        fmt="",
+        xticklabels=labels,
+        yticklabels=labels,
+    )
     plt.title("Recurrent Neural Network")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.savefig(filename)
     plt.close()
+
 
 def model_rnn(x_train, y_train, x_test, y_test, rnn_params):
     """
@@ -157,13 +206,19 @@ def model_rnn(x_train, y_train, x_test, y_test, rnn_params):
     y_test (Series): Target variable for testing.
     rnn_params (dict): Dictionary with parameters for building and training the RNN model.
     """
+    start_time = time.time()
     y_train_encoded, y_test_encoded = encode_labels(y_train, y_test)
     x_train_reshaped = np.expand_dims(x_train, axis=2)
     x_test_reshaped = np.expand_dims(x_test, axis=2)
-    
+
     model = train_rnn(x_train_reshaped, y_train_encoded, rnn_params)
+    end_time = time.time()
+    print(
+        f"RECURRENT NEURAL NETWORK Execution time: {end_time - start_time:.2f} seconds"
+    )
     predictions = evaluate_rnn_model(model, x_test_reshaped, y_test_encoded)
     plot_confusion_matrix_rnn(y_test_encoded, predictions)
+
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
 # model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)

@@ -26,21 +26,29 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import (
-    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, confusion_matrix
+    mean_absolute_error,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    confusion_matrix,
 )
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, SimpleRNN, Flatten, LSTM
 from tensorflow.keras.optimizers import Adam
 from sklearn.preprocessing import LabelEncoder
 
+
 def print_with_padding(message):
     """Prints a message with padding for better readability."""
     print(f"\n{'-'*10} {message} {'-'*10}\n")
 
+
 def score_model(predictions, y_true):
     """Calculates the accuracy score of the model predictions."""
     return accuracy_score(y_true, predictions)
+
 
 def train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params):
     """
@@ -55,15 +63,21 @@ def train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params):
     """
     label = ["Normal", "Anomalous"]
     models = {
-        "Random Forest": RandomForestClassifier(**model_params["RandomForestClassifier"]),
-        "K-Nearest Neighbors": KNeighborsClassifier(**model_params["KNeighborsClassifier"]),
-        "Decision Tree": DecisionTreeClassifier(**model_params["DecisionTreeClassifier"]),
+        "Random Forest": RandomForestClassifier(
+            **model_params["RandomForestClassifier"]
+        ),
+        "K-Nearest Neighbors": KNeighborsClassifier(
+            **model_params["KNeighborsClassifier"]
+        ),
+        "Decision Tree": DecisionTreeClassifier(
+            **model_params["DecisionTreeClassifier"]
+        ),
         "Logistic Regression": LogisticRegression(**model_params["LogisticRegression"]),
         "SVC": SVC(**model_params["SVC"]),
         "Naïve Bayes": GaussianNB(**model_params["GaussianNB"]),
     }
     trained_models = {}
-    
+
     for model_name, model in models.items():
         print_with_padding(model_name)
         print("Computing....")
@@ -121,6 +135,7 @@ def train_and_evaluate_models(x_tr, x_ts, y_tr, y_ts, model_params):
 
     # Rank models
     rank_models(trained_models, x_ts, y_ts)
+
 
 def train_deep_learning_models(x_tr, x_ts, y_tr, y_ts, model_params):
     """
@@ -230,6 +245,7 @@ def train_deep_learning_models(x_tr, x_ts, y_tr, y_ts, model_params):
     )
     accuracy = LSTM_model.evaluate(x_ts, y_ts_encoded)[1]
     print(f"Accuracy: {accuracy}")
+
 
 def rank_models(trained_models, x_ts, y_ts):
     """

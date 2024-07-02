@@ -16,6 +16,7 @@ model predictions.
 evaluate, and plot the Random Forest model.
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -154,7 +155,10 @@ def model_random_forest(x_train, y_train, x_test, y_test):
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
     """
+    start_time = time.time()
     model = train_random_forest(x_train, y_train)
+    end_time = time.time()
+    print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_model(model, x_test, y_test)
     plot_confusion_matrix(y_test, predictions)
 

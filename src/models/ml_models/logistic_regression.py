@@ -172,7 +172,10 @@ def model_logistic_regression(x_train, y_train, x_test, y_test, model_params):
     y_test (Series): Target variable for testing.
     model_params (dict): Dictionary containing model parameters (e.g., random_state, max_iter).
     """
+    start_time = time.time()
     model = train_logistic_regression(x_train, y_train, **model_params)
+    end_time = time.time()
+    print(f"LOGISTIC REGRESSION Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_logistic_regression_model(model, x_test, y_test)
     plot_confusion_matrix_lr(y_test, predictions)
 

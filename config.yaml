@@ -1,4 +1,4 @@
-data_path: "csic_database.csv"
+data_path: "https://minio.lab.sspcloud.fr/mthomassin/stage3A/data/raw/csic_database.csv"
 models:
   RandomForestClassifier:
     random_state: 1000

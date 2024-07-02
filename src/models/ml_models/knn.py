@@ -25,6 +25,7 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_knn(x_tr, y_tr, x_ts, y_ts, n_neighbors=9)
 """
 
+import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -163,7 +164,10 @@ def model_knn(x_train, y_train, x_test, y_test, n_neighbors=9):
     y_test (Series): Target variable for testing.
     n_neighbors (int): Number of neighbors to use for the K-Nearest Neighbors classifier.
     """
+    start_time = time.time()
     model = train_knn(x_train, y_train, n_neighbors)
+    end_time = time.time()
+    print(f"K-NEAREST NEIGHBOR Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_knn_model(model, x_test, y_test)
     plot_confusion_matrix_knn(y_test, predictions)
 
