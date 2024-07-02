@@ -153,6 +153,7 @@ def plot_confusion_matrix_lr(
     plt.title("Logistic Regression")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    filename = "output/fig/" + filename
     plt.savefig(filename)
     plt.close()
 

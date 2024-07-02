@@ -149,6 +149,7 @@ def plot_confusion_matrix_dt(
     plt.title("Decision Tree")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    filename = "output/fig/" + filename
     plt.savefig(filename)
     plt.close()
 

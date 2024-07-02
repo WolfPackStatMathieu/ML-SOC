@@ -150,6 +150,7 @@ def plot_confusion_matrix_svm(
     plt.title("Support Vector Machine")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    filename = "output/fig/" + filename
     plt.savefig(filename)
     plt.close()
 

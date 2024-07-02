@@ -188,6 +188,7 @@ def plot_confusion_matrix_rnn(
     plt.title("Recurrent Neural Network")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    filename = "output/fig/" + filename
     plt.savefig(filename)
     plt.close()
 
