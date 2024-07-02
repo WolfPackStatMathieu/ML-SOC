@@ -41,6 +41,8 @@ from src.models.ml_models.random_forest import model_random_forest
 from src.models.ml_models.knn import model_knn
 from src.models.ml_models.decision_tree import model_decision_tree
 from src.models.ml_models.logistic_regression import model_logistic_regression
+from src.models.ml_models.svm import model_svm
+
 
 def print_with_padding(message):
     print(f"\n{'-'*10} {message} {'-'*10}\n")
@@ -117,3 +119,11 @@ model_params = {
     'max_iter': 1000
 }
 model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params)
+
+print_with_padding("Support Vector Machine (SVM)")
+model_params = {
+    'C': 1.0,
+    'kernel': 'rbf',
+    'gamma': 'scale'
+}
+model_svm(x_tr, y_tr, x_ts, y_ts, model_params)
