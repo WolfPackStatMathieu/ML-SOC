@@ -45,6 +45,8 @@ from src.models.ml_models.svm import model_svm
 from src.models.ml_models.naive_bayes import model_naive_bayes
 
 from src.models.dl_models.rnn import model_rnn
+from src.models.dl_models.ann import model_ann
+from src.models.dl_models.cnn import model_cnn
 from src.utils.print_utils import print_with_padding
 
 # ----------------CONFIG ------------------
@@ -106,21 +108,27 @@ print_with_padding("RANDOM FOREST")
 # model_random_forest(x_tr, y_tr, x_ts, y_ts, model_params["RandomForestClassifier"])
 
 print_with_padding("K-NEAREST NEIGHBOR")
-model_knn(x_tr, y_tr, x_ts, y_ts, model_params["KNeighborsClassifier"])
+# model_knn(x_tr, y_tr, x_ts, y_ts, model_params["KNeighborsClassifier"])
  
 print_with_padding("DECISION TREE")
-model_decision_tree(x_tr, y_tr, x_ts, y_ts, model_params["DecisionTreeClassifier"])
+# model_decision_tree(x_tr, y_tr, x_ts, y_ts, model_params["DecisionTreeClassifier"])
 
 print_with_padding("LOGISTIC REGRESSION")
-model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params["LogisticRegression"])
+# model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params["LogisticRegression"])
 
 print_with_padding("SUPPORT VECTOR MACHINE (SVM)")
-model_svm(x_tr, y_tr, x_ts, y_ts, model_params["SVC"])
+# model_svm(x_tr, y_tr, x_ts, y_ts, model_params["SVC"])
 
 print_with_padding("NAÏVE BAYES")
-model_naive_bayes(x_tr, y_tr, x_ts, y_ts, model_params["GaussianNB"])
+# model_naive_bayes(x_tr, y_tr, x_ts, y_ts, model_params["GaussianNB"])
 
 print_with_padding("DEEP LEARNING")
-print_with_padding("RECURRENT NEURAL NETWORK")
 
-model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])
+print_with_padding("RECURRENT NEURAL NETWORK")
+# model_rnn(x_tr, y_tr, x_ts, y_ts, model_params["RNN"])
+
+print_with_padding("ARTIFICIAL NEURAL NETWORK")
+# model_ann(x_tr, y_tr, x_ts, y_ts, model_params["ANN"])
+
+print_with_padding("CONVOLUTIONAL NEURAL NETWORK")
+model_cnn(x_tr, y_tr, x_ts, y_ts, model_params["CNN"])
