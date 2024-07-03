@@ -8,3 +8,4 @@ eli5
 xgboost
 scikeras
 pytest
+pyyaml
