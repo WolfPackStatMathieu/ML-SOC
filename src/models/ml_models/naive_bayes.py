@@ -24,7 +24,6 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 # Train, evaluate, and plot the Naïve Bayes model
 model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
 """
-
 import time
 import numpy as np
 import pandas as pd
@@ -43,18 +42,19 @@ from sklearn.metrics import (
 )
 
 
-def train_naive_bayes(x_train, y_train):
+def train_naive_bayes(x_train, y_train, params):
     """
     Train a Naïve Bayes classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
+    params (dict): Hyperparameters for Naïve Bayes.
 
     Returns:
     GaussianNB: Trained Naïve Bayes model.
     """
-    nb_model = GaussianNB()
+    nb_model = GaussianNB(**params)
     print("Computing....")
     nb_model.fit(x_train, y_train)
     print("Done!")
@@ -154,7 +154,7 @@ def plot_confusion_matrix_nb(
     plt.close()
 
 
-def model_naive_bayes(x_train, y_train, x_test, y_test):
+def model_naive_bayes(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the Naïve Bayes model.
 
@@ -167,9 +167,10 @@ def model_naive_bayes(x_train, y_train, x_test, y_test):
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
+    params (dict): Hyperparameters for Naïve Bayes.
     """
     start_time = time.time()
-    model = train_naive_bayes(x_train, y_train)
+    model = train_naive_bayes(x_train, y_train, params)
     end_time = time.time()
     print(f"NAÏVE BAYES Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_naive_bayes_model(model, x_test, y_test)
@@ -177,4 +178,5 @@ def model_naive_bayes(x_train, y_train, x_test, y_test):
 
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
-# model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
+# model_params = {'var_smoothing': 1e-9}
+# model_naive_bayes(x_tr, y_tr, x_ts, y_ts, model_params)

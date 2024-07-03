@@ -24,7 +24,6 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 model_params = {'C': 1.0, 'kernel': 'rbf', 'gamma': 'scale'}
 model_svm(x_tr, y_tr, x_ts, y_ts, model_params)
 """
-
 import time
 import numpy as np
 import pandas as pd
@@ -43,19 +42,19 @@ from sklearn.metrics import (
 )
 
 
-def train_svm(x_train, y_train, **kwargs):
+def train_svm(x_train, y_train, params):
     """
     Train a Support Vector Machine classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
-    **kwargs: Additional keyword arguments for the SVC classifier.
+    params (dict): Hyperparameters for SVM.
 
     Returns:
     SVC: Trained Support Vector Machine model.
     """
-    svc_model = SVC(**kwargs)
+    svc_model = SVC(**params)
     print("Computing....")
     svc_model.fit(x_train, y_train)
     print("Done!")
@@ -155,7 +154,7 @@ def plot_confusion_matrix_svm(
     plt.close()
 
 
-def model_svm(x_train, y_train, x_test, y_test, model_params):
+def model_svm(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the SVM model.
 
@@ -167,17 +166,16 @@ def model_svm(x_train, y_train, x_test, y_test, model_params):
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
-    model_params (dict): Dictionary containing model parameters (e.g., C, kernel, gamma).
+    params (dict): Hyperparameters for SVM.
     """
     start_time = time.time()
-    model = train_svm(x_train, y_train, **model_params)
+    model = train_svm(x_train, y_train, params)
     end_time = time.time()
     print(
         f"SUPPORT VECTOR MACHINE (SVM) Execution time: {end_time - start_time:.2f} seconds"
     )
     predictions = evaluate_svm_model(model, x_test, y_test)
     plot_confusion_matrix_svm(y_test, predictions)
-
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
 # model_params = {

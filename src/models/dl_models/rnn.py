@@ -26,7 +26,6 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 # Train, evaluate, and plot the RNN model
 model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)
 """
-
 import time
 import numpy as np
 import pandas as pd
@@ -34,8 +33,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import (
-    mean_absolute_error,
-    accuracy_score,
+    mean_absolute_error,  # accuracy_score,
     precision_score,
     recall_score,
     f1_score,
@@ -45,7 +43,7 @@ from sklearn.metrics import (
 )
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import SimpleRNN, Dense, Input
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD, RMSprop
 
 
 def encode_labels(y_train, y_test):
@@ -65,28 +63,37 @@ def encode_labels(y_train, y_test):
     return y_train_encoded, y_test_encoded
 
 
-def build_rnn_model(input_shape, units=50, activation="relu", learning_rate=0.001):
+def build_rnn_model(input_shape, rnn_params):
     """
     Build a Keras RNN model.
 
     Parameters:
     input_shape (tuple): Shape of the input data.
-    units (int): Number of units in the RNN layer.
-    activation (str): Activation function for the RNN layer.
-    learning_rate (float): Learning rate for the optimizer.
+    rnn_params (dict): Dictionary with parameters for building the RNN model.
 
     Returns:
     Sequential: Compiled Keras RNN model.
     """
+    units = rnn_params["units"]
+    activation = rnn_params["activation"]
+    learning_rate = rnn_params["learning_rate"]
+    optimizer_name = rnn_params["optimizer"]
+    loss = rnn_params["loss"]
+    metrics = rnn_params["metrics"]
+
+    optimizer_classes = {
+        "Adam": Adam,
+        "SGD": SGD,
+        "RMSprop": RMSprop
+    }
+
+    optimizer = optimizer_classes[optimizer_name](learning_rate=learning_rate)
+
     model = Sequential()
     model.add(Input(shape=input_shape))
     model.add(SimpleRNN(units, activation=activation))
     model.add(Dense(1, activation="sigmoid"))
-    model.compile(
-        optimizer=Adam(learning_rate=learning_rate),
-        loss="binary_crossentropy",
-        metrics=["accuracy"],
-    )
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
     return model
 
 
@@ -103,12 +110,7 @@ def train_rnn(x_train, y_train, rnn_params):
     Sequential: Trained RNN model.
     """
     input_shape = (x_train.shape[1], 1)
-    model = build_rnn_model(
-        input_shape,
-        units=rnn_params["units"],
-        activation=rnn_params["activation"],
-        learning_rate=rnn_params["learning_rate"],
-    )
+    model = build_rnn_model(input_shape, rnn_params)
     model.fit(
         x_train,
         y_train,
@@ -222,4 +224,14 @@ def model_rnn(x_train, y_train, x_test, y_test, rnn_params):
 
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
+# rnn_params = {
+#     'units': 50,
+#     'activation': 'relu',
+#     'optimizer': 'Adam',
+#     'learning_rate': 0.001,
+#     'loss': 'binary_crossentropy',
+#     'metrics': ['accuracy'],
+#     'epochs': 50,
+#     'batch_size': 32
+# }
 # model_rnn(x_tr, y_tr, x_ts, y_ts, rnn_params)

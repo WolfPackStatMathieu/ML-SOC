@@ -45,20 +45,19 @@ from sklearn.metrics import (
 )
 
 
-def train_logistic_regression(x_train, y_train, random_state=42, max_iter=1000):
+def train_logistic_regression(x_train, y_train, params):
     """
     Train a Logistic Regression classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
-    random_state (int): Random state for reproducibility.
-    max_iter (int): Maximum number of iterations.
+    params (dict): Hyperparameters for Logistic Regression.
 
     Returns:
     LogisticRegression: Trained Logistic Regression model.
     """
-    lr_model = LogisticRegression(random_state=random_state, max_iter=max_iter)
+    lr_model = LogisticRegression(**params)
     print("Computing....")
     lr_model.fit(x_train, y_train)
     print("Done!")
@@ -158,28 +157,26 @@ def plot_confusion_matrix_lr(
     plt.close()
 
 
-def model_logistic_regression(x_train, y_train, x_test, y_test, model_params):
+def model_logistic_regression(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the Logistic Regression model.
 
     This function trains a Logistic Regression classifier on the training data, evaluates it on the
-    test data,
-    and plots the confusion matrix.
+    test data, and plots the confusion matrix.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
-    model_params (dict): Dictionary containing model parameters (e.g., random_state, max_iter).
+    params (dict): Hyperparameters for Logistic Regression.
     """
     start_time = time.time()
-    model = train_logistic_regression(x_train, y_train, **model_params)
+    model = train_logistic_regression(x_train, y_train, params)
     end_time = time.time()
     print(f"LOGISTIC REGRESSION Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_logistic_regression_model(model, x_test, y_test)
     plot_confusion_matrix_lr(y_test, predictions)
-
 
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
 # model_params = {

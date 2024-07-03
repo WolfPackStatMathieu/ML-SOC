@@ -103,27 +103,22 @@ print_with_padding("MACHINE LEARNING MODELS")
 
 # Timing and running models
 print_with_padding("RANDOM FOREST")
-model_random_forest(x_tr, y_tr, x_ts, y_ts)
-
+# model_random_forest(x_tr, y_tr, x_ts, y_ts, model_params["RandomForestClassifier"])
 
 print_with_padding("K-NEAREST NEIGHBOR")
-model_knn(x_tr, y_tr, x_ts, y_ts)
-
-
+model_knn(x_tr, y_tr, x_ts, y_ts, model_params["KNeighborsClassifier"])
+ 
 print_with_padding("DECISION TREE")
-model_decision_tree(x_tr, y_tr, x_ts, y_ts)
-
+model_decision_tree(x_tr, y_tr, x_ts, y_ts, model_params["DecisionTreeClassifier"])
 
 print_with_padding("LOGISTIC REGRESSION")
 model_logistic_regression(x_tr, y_tr, x_ts, y_ts, model_params["LogisticRegression"])
-
 
 print_with_padding("SUPPORT VECTOR MACHINE (SVM)")
 model_svm(x_tr, y_tr, x_ts, y_ts, model_params["SVC"])
 
 print_with_padding("NAÏVE BAYES")
-model_naive_bayes(x_tr, y_tr, x_ts, y_ts)
-
+model_naive_bayes(x_tr, y_tr, x_ts, y_ts, model_params["GaussianNB"])
 
 print_with_padding("DEEP LEARNING")
 print_with_padding("RECURRENT NEURAL NETWORK")

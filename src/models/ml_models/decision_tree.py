@@ -24,7 +24,6 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 # Train, evaluate, and plot the Decision Tree model
 model_decision_tree(x_tr, y_tr, x_ts, y_ts, random_state=2)
 """
-
 import time
 import numpy as np
 import pandas as pd
@@ -43,19 +42,19 @@ from sklearn.metrics import (
 )
 
 
-def train_decision_tree(x_train, y_train, random_state=2):
+def train_decision_tree(x_train, y_train, params):
     """
     Train a Decision Tree classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
-    random_state (int): Random state for reproducibility.
+    params (dict): Hyperparameters for Decision Tree.
 
     Returns:
     DecisionTreeClassifier: Trained Decision Tree model.
     """
-    dt_model = DecisionTreeClassifier(random_state=random_state)
+    dt_model = DecisionTreeClassifier(**params)
     print("Computing....")
     dt_model.fit(x_train, y_train)
     print("Done!")
@@ -154,28 +153,26 @@ def plot_confusion_matrix_dt(
     plt.close()
 
 
-def model_decision_tree(x_train, y_train, x_test, y_test, random_state=2):
+def model_decision_tree(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the Decision Tree model.
 
     This function trains a Decision Tree classifier on the training data, evaluates it on the
-    test data,
-    and plots the confusion matrix.
+    test data, and plots the confusion matrix.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
-    random_state (int): Random state for reproducibility.
+    params (dict): Hyperparameters for Decision Tree.
     """
     start_time = time.time()
-    model = train_decision_tree(x_train, y_train, random_state)
+    model = train_decision_tree(x_train, y_train, params)
     end_time = time.time()
     print(f"DECISION TREE Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_decision_tree_model(model, x_test, y_test)
     plot_confusion_matrix_dt(y_test, predictions)
 
-
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
-# model_decision_tree(x_tr, y_tr, x_ts, y_ts)
+# model_decision_tree(x_tr, y_tr, x_ts, y_ts, {"random_state": 2})

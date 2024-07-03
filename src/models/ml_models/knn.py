@@ -24,7 +24,6 @@ x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
 # Train, evaluate, and plot the K-Nearest Neighbors model
 model_knn(x_tr, y_tr, x_ts, y_ts, n_neighbors=9)
 """
-
 import time
 import numpy as np
 import pandas as pd
@@ -36,8 +35,6 @@ from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
-)
-from sklearn.metrics import (
     f1_score,
     roc_auc_score,
     classification_report,
@@ -45,19 +42,19 @@ from sklearn.metrics import (
 )
 
 
-def train_knn(x_train, y_train, n_neighbors=9):
+def train_knn(x_train, y_train, params):
     """
     Train a K-Nearest Neighbors classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
-    n_neighbors (int): Number of neighbors to use.
+    params (dict): Hyperparameters for K-Nearest Neighbors.
 
     Returns:
     KNeighborsClassifier: Trained K-Nearest Neighbors model.
     """
-    knn_model = KNeighborsClassifier(n_neighbors=n_neighbors)
+    knn_model = KNeighborsClassifier(**params)
     knn_model.fit(x_train, y_train)
     return knn_model
 
@@ -150,7 +147,7 @@ def plot_confusion_matrix_knn(y_test, predictions, labels=None):
     plt.show()
 
 
-def model_knn(x_train, y_train, x_test, y_test, n_neighbors=9):
+def model_knn(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the K-Nearest Neighbors model.
 
@@ -162,15 +159,14 @@ def model_knn(x_train, y_train, x_test, y_test, n_neighbors=9):
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
-    n_neighbors (int): Number of neighbors to use for the K-Nearest Neighbors classifier.
+    params (dict): Hyperparameters for K-Nearest Neighbors.
     """
     start_time = time.time()
-    model = train_knn(x_train, y_train, n_neighbors)
+    model = train_knn(x_train, y_train, params)
     end_time = time.time()
     print(f"K-NEAREST NEIGHBOR Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_knn_model(model, x_test, y_test)
     plot_confusion_matrix_knn(y_test, predictions)
 
-
 # Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
-# model_knn(x_tr, y_tr, x_ts, y_ts)
+# model_knn(x_tr, y_tr, x_ts, y_ts, {"n_neighbors": 9})

@@ -1,21 +1,3 @@
-"""
-Module for training, evaluating, and visualizing a Random
-Forest classifier.
-
-This module provides functions to train a Random
-Forest classifier, evaluate its performance on a test
-set, and visualize the results using a confusion matrix. 
-It includes the following functions:
-
-- train_random_forest: Trains the Random Forest model.
-- evaluate_model: Evaluates the trained model and prints
-various performance metrics.
-- plot_confusion_matrix: Plots the confusion matrix for the
-model predictions.
-- model_random_forest: High-level function to train,
-evaluate, and plot the Random Forest model.
-"""
-
 import time
 import numpy as np
 import pandas as pd
@@ -27,8 +9,6 @@ from sklearn.metrics import (
     accuracy_score,
     precision_score,
     recall_score,
-)
-from sklearn.metrics import (
     f1_score,
     roc_auc_score,
     classification_report,
@@ -36,18 +16,19 @@ from sklearn.metrics import (
 )
 
 
-def train_random_forest(x_train, y_train):
+def train_random_forest(x_train, y_train, params):
     """
     Train a Random Forest classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
+    params (dict): Hyperparameters for Random Forest.
 
     Returns:
     RandomForestClassifier: Trained Random Forest model.
     """
-    random_forest_model = RandomForestClassifier(random_state=1000)
+    random_forest_model = RandomForestClassifier(**params)
     print("Computing....")
     random_forest_model.fit(x_train, y_train)
     print("Done!")
@@ -142,7 +123,7 @@ def plot_confusion_matrix(y_test, predictions, labels=None):
     plt.show()
 
 
-def model_random_forest(x_train, y_train, x_test, y_test):
+def model_random_forest(x_train, y_train, x_test, y_test, params):
     """
     Train, evaluate, and plot the Random Forest model.
 
@@ -154,14 +135,11 @@ def model_random_forest(x_train, y_train, x_test, y_test):
     y_train (Series): Target variable for training.
     x_test (DataFrame): Features for testing.
     y_test (Series): Target variable for testing.
+    params (dict): Hyperparameters for Random Forest.
     """
     start_time = time.time()
-    model = train_random_forest(x_train, y_train)
+    model = train_random_forest(x_train, y_train, params)
     end_time = time.time()
     print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_model(model, x_test, y_test)
     plot_confusion_matrix(y_test, predictions)
-
-
-# Exemple d'appel de la fonction avec les ensembles d'entraînement et de test
-# model_random_forest(x_tr, y_tr, x_ts, y_ts)
