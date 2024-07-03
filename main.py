@@ -47,6 +47,7 @@ from src.models.ml_models.naive_bayes import model_naive_bayes
 from src.models.dl_models.rnn import model_rnn
 from src.models.dl_models.ann import model_ann
 from src.models.dl_models.cnn import model_cnn
+from src.models.dl_models.lstm import model_lstm
 from src.utils.print_utils import print_with_padding
 
 # ----------------CONFIG ------------------
@@ -131,4 +132,7 @@ print_with_padding("ARTIFICIAL NEURAL NETWORK")
 # model_ann(x_tr, y_tr, x_ts, y_ts, model_params["ANN"])
 
 print_with_padding("CONVOLUTIONAL NEURAL NETWORK")
-model_cnn(x_tr, y_tr, x_ts, y_ts, model_params["CNN"])
+# model_cnn(x_tr, y_tr, x_ts, y_ts, model_params["CNN"])
+
+print_with_padding("LONG SHORT TERM MEMORY")
+# model_lstm(x_tr, y_tr, x_ts, y_ts, model_params["LSTM"])
