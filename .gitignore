@@ -1,5 +1,6 @@
 csic_database.csv
 __pycache__/
 test.py
+.pytest_cache/
 # ignorer le virtual environment
 dev/
