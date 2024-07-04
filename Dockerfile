@@ -24,4 +24,4 @@ COPY . .
 EXPOSE 8000
 
 # Définir la commande par défaut pour exécuter l'application
-CMD ["python3", "app.py"]
+CMD ["python3", "main.py"]
