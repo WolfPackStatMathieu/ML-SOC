@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM ubuntu:22.04
 
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
@@ -7,7 +7,8 @@ WORKDIR /ML-SOC
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get install -y python3-pip
 
 # Copier requirements.txt en premier pour tirer parti du cache Docker
 COPY requirements.txt .
@@ -16,7 +17,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier tout le reste du projet
-COPY . .
+COPY main.py .
+
+COPY src ./src
 
 # Définir la commande par défaut pour exécuter le script principal
 CMD ["python3", "main.py"]
