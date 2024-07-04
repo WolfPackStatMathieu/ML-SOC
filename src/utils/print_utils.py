@@ -12,10 +12,10 @@ Functions:
 def print_with_padding(message):
     """
     Print a message with padding for better readability.
-    
+
     Parameters:
     message (str): The message to be printed.
-    
+
     Example usage:
     --------------
     print_with_padding("This is a test message")
