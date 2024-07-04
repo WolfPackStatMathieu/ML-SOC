@@ -1,3 +1,4 @@
+# Utiliser l'image de base Ubuntu
 FROM ubuntu:22.04
 
 # Définir le répertoire de travail
@@ -7,22 +8,20 @@ WORKDIR /ML-SOC
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get install -y python3-pip
+    python3-pip && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copier requirements.txt en premier pour tirer parti du cache Docker
+# Copier le fichier requirements.txt dans le conteneur
 COPY requirements.txt .
 
 # Installer les dépendances Python
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copier tout le reste du projet
-COPY main.py .
+# Copier le reste des fichiers de l'application dans le conteneur
+COPY . .
 
-COPY src ./src
+# Exposer le port que l'application utilise
+EXPOSE 8000
 
-# Définir la commande par défaut pour exécuter le script principal
-CMD ["python3", "main.py"]
-
-# Vous pouvez décommenter cette ligne si vous avez besoin d'exécuter train.py pendant la construction
-# RUN python3 train.py
+# Définir la commande par défaut pour exécuter l'application
+CMD ["python3", "app.py"]
