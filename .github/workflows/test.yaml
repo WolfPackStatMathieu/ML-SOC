@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+# Déclenche le workflow sur les pushs vers les branches 'main' et 'dev'
+on:
+  push:
+    branches:
+      - main
+      - dev
+    tags:
+      - 'v*'
+
+# Définition des jobs du workflow
+jobs:
+  # Job pour tester le code
+  test:
+    runs-on: ubuntu-latest  # Utilise un runner Ubuntu
+
+    steps:
+      # Étape pour vérifier le code source du dépôt
+      - uses: actions/checkout@v4
+
+      # Étape pour configurer Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Utilise la dernière version mineure de Python 3
+
+      # Étape pour installer les dépendances du projet
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip  # Met à jour pip
+          pip install -r requirements.txt  # Installe les dépendances à partir du fichier requirements.txt
+          pip install pylint  # Installe pylint pour l'analyse statique du code
+
+      # Étape pour analyser statiquement le code avec pylint
+      - name: Lint
+        run: |
+          pylint src --fail-under=6  # Analyse le code dans le répertoire 'src' et échoue si le score est inférieur à 6
+
+      # Étape pour exécuter les tests Python
+      - name: Test Python code
+        run: python main.py  # Exécute le script 'main.py' pour tester le code
