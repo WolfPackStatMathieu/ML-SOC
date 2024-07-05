@@ -1,5 +1,6 @@
 # Utiliser l'image de base Ubuntu
-FROM ubuntu:22.04
+FROM inseefrlab/onyxia-python-minimal:py3.10.9
+
 
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
