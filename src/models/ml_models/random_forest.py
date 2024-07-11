@@ -1,4 +1,5 @@
 import time
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -121,7 +122,9 @@ def evaluate_model(model, x_test, y_test):
     return predictions
 
 
-def plot_confusion_matrix(y_test, predictions, labels=None):
+def plot_confusion_matrix(
+    y_test, predictions, labels=None, output_path="output/fig/confusion_matrix_rf.png"
+):
     """
     Plot the confusion matrix for the model predictions.
 
@@ -150,6 +153,11 @@ def plot_confusion_matrix(y_test, predictions, labels=None):
     plt.title("Random Forest")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
+    # Ensure the output directory exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Save the plot
+    plt.savefig(output_path)
     plt.show()
 
 
