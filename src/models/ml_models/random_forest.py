@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     mean_absolute_error,
@@ -14,6 +16,7 @@ from sklearn.metrics import (
     classification_report,
     confusion_matrix,
 )
+from src.mlflow.mlflow_utils import log_gsvc_to_mlflow
 
 
 def train_random_forest(x_train, y_train, params):
@@ -29,10 +32,37 @@ def train_random_forest(x_train, y_train, params):
     RandomForestClassifier: Trained Random Forest model.
     """
     random_forest_model = RandomForestClassifier(**params)
+    preprocessor = None
+    pipe_rf = Pipeline(
+        [("preprocessor", preprocessor), ("classifier", random_forest_model)]
+    )
+
+    param_grid = {
+        "classifier__n_estimators": [50, 100, 200],
+        "classifier__max_leaf_nodes": [5, 10, 50],
+    }
+
+    pipe_gscv = GridSearchCV(
+        pipe_rf,
+        param_grid=param_grid,
+        scoring=["accuracy", "precision", "recall", "f1"],
+        refit="f1",
+        cv=5,
+        n_jobs=5,
+        verbose=1,
+    )
     print("Computing....")
-    random_forest_model.fit(x_train, y_train)
+
+    # Fit the model using GridSearchCV
+    pipe_gscv.fit(x_train, y_train)
+    # Log results to MLflow
+    log_gsvc_to_mlflow(gscv=pipe_gscv, mlflow_experiment_name="random_forest")
+
+    # Evaluate the best model
+    best_model = pipe_gscv.best_estimator_
+
     print("Done!")
-    return random_forest_model
+    return best_model
 
 
 def evaluate_model(model, x_test, y_test):
