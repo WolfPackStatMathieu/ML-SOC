@@ -53,41 +53,6 @@ from src.utils.content_utils import (
 from sklearn.preprocessing import LabelEncoder
 
 
-def filtrage_colonnes(data):
-    """
-    Preprocess and extract features from the raw data.
-
-    Parameters:
-    data (pd.DataFrame): The raw data.
-
-    Returns:
-    pd.DataFrame: The features.
-   
-    """
-    feature_names = [
-        "Unnamed: 0",
-        "Method",
-        "User-Agent",
-        "Pragma",
-        "Cache-Control",
-        "Accept",
-        "Accept-encoding",
-        "Accept-charset",
-        "language",
-        "host",
-        "cookie",
-        "content-type",
-        "connection",
-        "lenght",
-        "content",
-        "classification",
-        "URL",
-    ]
-
-    X = data[feature_names]
-    return X
-
-
 def build_features(data):
     """
     Preprocess and extract features from the raw data.

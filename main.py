@@ -37,7 +37,6 @@ from src.data.load_data import load_csv_data
 from src.features.build_features import build_features
 
 from sklearn.model_selection import train_test_split
-from src.features.build_features import filtrage_colonnes
 from src.models.ml_models.random_forest import model_random_forest
 from src.models.ml_models.knn import model_knn
 from src.models.ml_models.decision_tree import model_decision_tree
@@ -77,9 +76,9 @@ print_with_padding("Data Visualization")
 sns.set_style("darkgrid")
 sns.countplot(data=csic_data, x="Unnamed: 0")
 
-# Build features
-X = filtrage_colonnes(csic_data)
 
+print_with_padding("Preprocessing")
+# Build features
 X, y = build_features(csic_data)
 
 # Split the dataset into training and testing sets
@@ -98,6 +97,8 @@ print(y_tr.name)
 
 x_ts = x_ts.reset_index(drop=True)
 y_ts = pd.Series(y_ts).reset_index(drop=True)
+
+
 # Display mean of features for each class in the testing set
 for k in range(np.unique(y_ts).size):
     print('mean of class ' + str(k) + ':\n', x_ts[y_ts == k].mean(axis=0))
