@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     mean_absolute_error,
@@ -18,7 +18,8 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from src.mlflow.mlflow_utils import log_gsvc_to_mlflow
-
+from src.features.preprocessing import preprocessing_pipeline
+from sklearn.compose import ColumnTransformer
 
 def train_random_forest(x_train, y_train, params):
     """
@@ -33,9 +34,8 @@ def train_random_forest(x_train, y_train, params):
     RandomForestClassifier: Trained Random Forest model.
     """
     random_forest_model = RandomForestClassifier(**params)
-    preprocessor = None
     pipe_rf = Pipeline(
-        [("preprocessor", preprocessor), ("classifier", random_forest_model)]
+        [("classifier", random_forest_model)]
     )
 
     param_grid = {
@@ -161,23 +161,47 @@ def plot_confusion_matrix(
     plt.show()
 
 
-def model_random_forest(x_train, y_train, x_test, y_test, params):
+def model_random_forest(data, params):
     """
     Train, evaluate, and plot the Random Forest model.
 
-    This function trains a Random Forest classifier on the training data, evaluates it on the test
+    This function trains a Random Forest classifier on the dataset, evaluates it on the test
     data, and plots the confusion matrix.
 
     Parameters:
-    x_train (DataFrame): Features for training.
-    y_train (Series): Target variable for training.
-    x_test (DataFrame): Features for testing.
-    y_test (Series): Target variable for testing.
+    data (pd.DataFrame): The raw data.
     params (dict): Hyperparameters for Random Forest.
     """
+    print("Building features and preprocessing...")
+    preprocessor, numeric_transformer, categorical_transformer = preprocessing_pipeline()
+
+    # Apply feature builder separately
+    feature_builder = preprocessor.named_steps['feature_builder']
+    X_transformed, y = feature_builder.fit_transform(data)
+    print(f"Features after feature_builder.transform: {X_transformed.shape}")
+    print(f"Numeric features: {feature_builder.numeric_features}")
+    print(f"Categorical features: {feature_builder.categorical_features}")
+
+     # Create ColumnTransformer with the correct features
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numeric_transformer, feature_builder.numeric_features),
+            ('cat', categorical_transformer, feature_builder.categorical_features)
+        ])
+
+    # Fit and transform the data with ColumnTransformer
+    X = preprocessor.fit_transform(X_transformed)
+    print(f"Features after preprocessor.transform: {X.shape}")
+
+    # Split the dataset into training and testing sets
+    print("Computing train and test split...")
+    x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
+    print(f"Training set shape: {x_tr.shape}, Testing set shape: {x_ts.shape}")
+    print("Done!")
+
     start_time = time.time()
-    model = train_random_forest(x_train, y_train, params)
+    model = train_random_forest(x_tr, y_tr, params)
     end_time = time.time()
     print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
-    predictions = evaluate_model(model, x_test, y_test)
-    plot_confusion_matrix(y_test, predictions)
+    predictions = evaluate_model(model, x_ts, y_ts)
+    plot_confusion_matrix(y_ts, predictions)

@@ -1,18 +1,3 @@
-"""
-Module for building features from raw data.
-
-This module provides a function `build_features` to preprocess
-and extract features from the raw data.
-
-Example usage:
---------------
-X, y = build_features(data)
-
-Functions:
-----------
-- build_features(data): Preprocesses the raw data and extracts features.
-"""
-
 from src.utils.url_utils import (
     count_dot,
     no_of_dir,
@@ -163,4 +148,24 @@ def build_features(data):
     # Encode target variable
     y = le.fit_transform(y.astype(str))
 
-    return X.drop(columns=["Class"]), y
+    # Ensure categorical features are treated as strings for imputation
+    for feature in categorical_features:
+        X[feature] = X[feature].astype(str)
+
+    # Identify the new numeric and categorical features
+    numeric_features = [
+        "content_length", "count_dot_url", "count_dir_url", "count_embed_domain_url",
+        "shortening_service_url", "count_http_url", "count%_url", "count?_url", 
+        "count-_url", "count=_url", "url_length", "hostname_length_url", "sus_url",
+        "count_digits_url", "count_letters_url", "number_of_parameters_url", 
+        "number_of_fragments_url", "is_encoded_url", "special_count_url", 
+        "unusual_character_ratio_url", "count_dot_content", "count_dir_content", 
+        "count_embed_domain_content", "count%_content", "count?_content", 
+        "count-_content", "count=_content", "sus_content", "count_digits_content", 
+        "count_letters_content", "content_length", "is_encoded_content", 
+        "special_count_content"
+    ]
+
+    print(f"Features generated: {numeric_features + categorical_features}")
+
+    return X.drop(columns=["Class"]), y, numeric_features, categorical_features
