@@ -43,6 +43,9 @@ print("Data types in the dataset: ", csic_data.dtypes)
 rows_for_prediction = csic_data.head(5)
 
 print(rows_for_prediction)
+
+os.system(f"mc cp s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl ./complete_preprocessor_pipeline.pkl")
+
 # Étape 5: Chargement du pipeline de prétraitement sauvegardé
 complete_pipeline = joblib.load('complete_preprocessor_pipeline.pkl')
 

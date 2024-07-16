@@ -200,7 +200,9 @@ def model_random_forest(data, params):
         ('feature_builder', feature_builder),
         ('preprocessor', preprocessor)
     ])
+    
     joblib.dump(complete_pipeline, 'complete_preprocessor_pipeline.pkl')
+
 
 
     # Split the dataset into training and testing sets
