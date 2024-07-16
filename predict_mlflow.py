@@ -1,23 +1,26 @@
+"""
+Module for making predictions using a pre-trained model and pre-processing pipeline.
+"""
+
 import os
+import joblib
 import mlflow
 from src.config.load_config import load_config
 from src.data.load_data import load_csv_data
 from src.utils.print_utils import print_with_padding
-import joblib
-import pandas as pd
 
 print_with_padding("MLflow Tracking Server")
-# Automatic discovery : if MLFlow has been lancé before Jupyter/VSCode
+# Automatic discovery: if MLFlow has been launched before Jupyter/VSCode
 if "MLFLOW_TRACKING_URI" in os.environ:
     print(os.environ["MLFLOW_TRACKING_URI"])
 else:
     print("MLflow was not automatically discovered, a tracking URI must be provided manually.")
 
-model_name = "random_forest_detection"
-version = 2
+MODEL_NAME = "random_forest_detection"
+VERSION = 2
 
 model = mlflow.pyfunc.load_model(
-    model_uri=f"models:/{model_name}/{version}"
+    model_uri=f"models:/{MODEL_NAME}/{VERSION}"
 )
 
 print_with_padding("READ config.yaml")
@@ -63,5 +66,9 @@ try:
     # Affichage des prédictions
     print_with_padding("PREDICTIONS")
     print(predictions)
+except ValueError as e:
+    print(f"ValueError during transformation or prediction: {e}")
+except KeyError as e:
+    print(f"KeyError during transformation or prediction: {e}")
 except Exception as e:
-    print(f"Error during transformation or prediction: {e}")
+    print(f"Unexpected error during transformation or prediction: {e}")
