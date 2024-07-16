@@ -10,7 +10,7 @@ from src.data.load_data import load_csv_data
 from src.utils.print_utils import print_with_padding
 
 print_with_padding("MLflow Tracking Server")
-# Automatic discovery: if MLFlow has been launched before Jupyter/VSCode
+# Automatic discovery: if MLFlow has been lancé before Jupyter/VSCode
 if "MLFLOW_TRACKING_URI" in os.environ:
     print(os.environ["MLFLOW_TRACKING_URI"])
 else:
@@ -40,8 +40,9 @@ print("Columns in the dataset: ", csic_data.columns)
 print("Data types in the dataset: ", csic_data.dtypes)
 
 # Étape 4: Extraction des lignes pour la prédiction
-rows_for_prediction = csic_data.head(1)
+rows_for_prediction = csic_data.head(5)
 
+print(rows_for_prediction)
 # Étape 5: Chargement du pipeline de prétraitement sauvegardé
 complete_pipeline = joblib.load('complete_preprocessor_pipeline.pkl')
 
@@ -66,6 +67,16 @@ try:
     # Affichage des prédictions
     print_with_padding("PREDICTIONS")
     print(predictions)
+    urls = rows_for_prediction['URL'].tolist()
+    for i, prediction in enumerate(predictions):
+        url = urls[i].split(" ")[0]  # Extraire l'URL avant " HTTP/1.1"
+        if prediction == 1:
+            print("Requête anormale")
+            print(url)
+        else:
+            print("Requête normale")
+            print(url)
+
 except ValueError as e:
     print(f"ValueError during transformation or prediction: {e}")
 except KeyError as e:
