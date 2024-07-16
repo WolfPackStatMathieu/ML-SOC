@@ -1,6 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from src.features.build_features import build_features
 
+
 class FeatureBuilder(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.numeric_features = []

@@ -20,6 +20,8 @@ from sklearn.metrics import (
 from src.mlflow.mlflow_utils import log_gsvc_to_mlflow
 from src.features.preprocessing import preprocessing_pipeline
 from sklearn.compose import ColumnTransformer
+import joblib
+
 
 def train_random_forest(x_train, y_train, params):
     """
@@ -182,7 +184,7 @@ def model_random_forest(data, params):
     print(f"Numeric features: {feature_builder.numeric_features}")
     print(f"Categorical features: {feature_builder.categorical_features}")
 
-     # Create ColumnTransformer with the correct features
+    # Create ColumnTransformer with the correct features
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numeric_transformer, feature_builder.numeric_features),
@@ -192,6 +194,14 @@ def model_random_forest(data, params):
     # Fit and transform the data with ColumnTransformer
     X = preprocessor.fit_transform(X_transformed)
     print(f"Features after preprocessor.transform: {X.shape}")
+
+    # Sauvegarder le pipeline complet de prétraitement (incluant FeatureBuilder et ColumnTransformer)
+    complete_pipeline = Pipeline(steps=[
+        ('feature_builder', feature_builder),
+        ('preprocessor', preprocessor)
+    ])
+    joblib.dump(complete_pipeline, 'complete_preprocessor_pipeline.pkl')
+
 
     # Split the dataset into training and testing sets
     print("Computing train and test split...")

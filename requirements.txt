@@ -10,3 +10,4 @@ scikeras
 pytest
 pyyaml
 mlflow
+joblib
