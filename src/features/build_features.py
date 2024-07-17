@@ -49,6 +49,9 @@ def build_features(data):
     pd.DataFrame: The features.
     pd.Series: The target variable.
     """
+
+    print("Colonnes avant la transformation dans 'build_features':")
+    print(data.columns)
     feature_names = [
         "Method",
         "User-Agent",
@@ -164,5 +167,7 @@ def build_features(data):
     ]
 
     print(f"Features generated: {numeric_features + categorical_features}")
+    print("Colonnes après transformation dans 'build_features':")
+    print(X.columns)
 
     return X, y, numeric_features, categorical_features

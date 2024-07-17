@@ -115,6 +115,8 @@ print_with_padding("MACHINE LEARNING MODELS")
 
 # Timing and running models
 print_with_padding("RANDOM FOREST")
+print("Colonnes avant l'appel de 'model_random_forest':")
+print(csic_data.columns)
 
 model_random_forest(csic_data, model_params["RandomForestClassifier"])
 

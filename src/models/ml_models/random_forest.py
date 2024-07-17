@@ -184,6 +184,9 @@ def model_random_forest(data, params):
     print(f"Numeric features: {feature_builder.numeric_features}")
     print(f"Categorical features: {feature_builder.categorical_features}")
 
+    print("Colonnes après feature_builder.transform:")
+    print(X_transformed.columns)
+
     # Create ColumnTransformer with the correct features
     preprocessor = ColumnTransformer(
         transformers=[
@@ -194,6 +197,8 @@ def model_random_forest(data, params):
     # Fit and transform the data with ColumnTransformer
     X = preprocessor.fit_transform(X_transformed)
     print(f"Features after preprocessor.transform: {X.shape}")
+    print("Colonnes après preprocessor.transform:")
+    print(X.columns if hasattr(X, 'columns') else 'Not a DataFrame')
 
     # Sauvegarder le pipeline complet de prétraitement (incluant FeatureBuilder et ColumnTransformer)
     complete_pipeline = Pipeline(steps=[
