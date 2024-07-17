@@ -5,6 +5,9 @@ Module for making predictions using a pre-trained model and pre-processing pipel
 import os
 import joblib
 import mlflow
+import json
+import pandas as pd  # Importation manquante ajoutée
+import numpy as np
 from src.config.load_config import load_config
 from src.data.load_data import load_csv_data
 from src.utils.print_utils import print_with_padding
@@ -42,7 +45,30 @@ print("Data types in the dataset: ", csic_data.dtypes)
 # Étape 4: Extraction des lignes pour la prédiction
 rows_for_prediction = csic_data.head(5)
 
-print(rows_for_prediction)
+# Imprimer les colonnes du DataFrame avant toute modification
+print("Columns in rows_for_prediction: ", rows_for_prediction.columns)
+
+# Supprimer la colonne 'classification' pour les requêtes JSON
+rows_for_print = rows_for_prediction.drop(columns=['classification'])
+
+# Renommer les colonnes uniquement pour l'impression JSON
+column_mapping = {
+    'Unnamed: 0': 'Unnamed_0',
+    'User-Agent': 'User_Agent',
+    'Cache-Control': 'Cache_Control',
+    'Accept-encoding': 'Accept_encoding',
+    'Accept-charset': 'Accept_charset',
+    'content-type': 'content_type'
+}
+
+rows_for_print = rows_for_print.rename(columns=column_mapping)
+
+# Imprimer les données de rows_for_print sous forme de requêtes JSON pour l'API
+print_with_padding("EXAMPLES OF JSON REQUESTS FOR API")
+json_requests = rows_for_print.replace({np.nan: None}).to_dict(orient="records")
+for request in json_requests:
+    json_request = json.dumps(request, indent=2)
+    print(json_request)
 
 os.system(f"mc cp s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl ./complete_preprocessor_pipeline.pkl")
 
@@ -57,7 +83,10 @@ try:
     # Appliquer FeatureBuilder pour générer les fonctionnalités manquantes
     feature_builder = complete_pipeline.named_steps['feature_builder']
     X_transformed, _ = feature_builder.transform(rows_for_prediction)
-    print(f"Features after feature_builder.transform: {X_transformed.shape}")
+    if isinstance(X_transformed, pd.DataFrame):
+        print(f"Columns after feature_builder.transform: {X_transformed.columns}")
+    else:
+        print(f"Shape of X_transformed: {X_transformed.shape}")
 
     # Appliquer le reste du pipeline de prétraitement
     preprocessor = complete_pipeline.named_steps['preprocessor']
