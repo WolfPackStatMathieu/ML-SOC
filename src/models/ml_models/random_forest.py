@@ -202,7 +202,7 @@ def model_random_forest(data, params):
     ])
     
     joblib.dump(complete_pipeline, 'complete_preprocessor_pipeline.pkl')
-
+    os.system(f"mc cp complete_preprocessor_pipeline.pkl s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
 
 
     # Split the dataset into training and testing sets

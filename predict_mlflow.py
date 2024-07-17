@@ -20,7 +20,7 @@ else:
     print("MLflow was not automatically discovered, a tracking URI must be provided manually.")
 
 MODEL_NAME = "random_forest_detection"
-VERSION = 2
+VERSION = 3
 
 model = mlflow.pyfunc.load_model(
     model_uri=f"models:/{MODEL_NAME}/{VERSION}"
@@ -49,11 +49,10 @@ rows_for_prediction = csic_data.head(5)
 print("Columns in rows_for_prediction: ", rows_for_prediction.columns)
 
 # Supprimer la colonne 'classification' pour les requêtes JSON
-rows_for_print = rows_for_prediction.drop(columns=['classification'])
+rows_for_print = rows_for_prediction.drop(columns=['classification', 'Unnamed: 0'])
 
 # Renommer les colonnes uniquement pour l'impression JSON
 column_mapping = {
-    'Unnamed: 0': 'Unnamed_0',
     'User-Agent': 'User_Agent',
     'Cache-Control': 'Cache_Control',
     'Accept-encoding': 'Accept_encoding',
@@ -102,7 +101,7 @@ try:
     urls = rows_for_prediction['URL'].tolist()
     for i, prediction in enumerate(predictions):
         url = urls[i].split(" ")[0]  # Extraire l'URL avant " HTTP/1.1"
-        if prediction == 1:
+        if prediction == 0:
             print("Requête anormale")
             print(url)
         else:

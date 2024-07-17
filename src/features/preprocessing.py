@@ -18,7 +18,6 @@ def filtrage_colonnes(data):
     pd.DataFrame: Filtered and renamed columns.
     """
     feature_names = [
-        "Unnamed: 0",
         "Method",
         "User-Agent",
         "Pragma",
@@ -33,11 +32,10 @@ def filtrage_colonnes(data):
         "connection",
         "lenght",
         "content",
-        "classification",
         "URL",
     ]
     X = data[feature_names]
-    X = X.rename(columns={"Unnamed: 0": "Class", "lenght": "content_length"})
+    X = X.rename(columns={"lenght": "content_length"})
     return X
 
 
@@ -61,7 +59,6 @@ def build_features(data):
         "Accept",
         "content_length",
         "content",
-        "classification",
         "URL",
     ]
     return X[selected_features], data["target_column"]

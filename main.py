@@ -72,6 +72,11 @@ print_with_padding("READ CSV")
 
 csic_data = load_csv_data(CSIC_FILEPATH)
 
+# Supprimer la colonne 'Unnamed: 0'
+csic_data = csic_data.drop(columns=['Unnamed: 0'], errors='ignore')
+
+print("Colonnes après suppression de 'Unnamed: 0':")
+print(csic_data.columns)
 # print("Number of samples:", csic_data.shape[0])
 # print("Number of features:", csic_data.shape[1])
 # Data Visualization

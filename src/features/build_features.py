@@ -50,7 +50,6 @@ def build_features(data):
     pd.Series: The target variable.
     """
     feature_names = [
-        "Unnamed: 0",
         "Method",
         "User-Agent",
         "Pragma",
@@ -65,27 +64,25 @@ def build_features(data):
         "connection",
         "lenght",
         "content",
-        "classification",
         "URL",
     ]
 
     X = data[feature_names]
-    X = X.rename(columns={"Unnamed: 0": "Class", "lenght": "content_length"})
+    X = X.rename(columns={"lenght": "content_length"})
 
     selected_features = [
-        "Class",
+
         "Method",
         "host",
         "cookie",
         "Accept",
         "content_length",
         "content",
-        "classification",
         "URL",
     ]
 
+    y = data["classification"]
     X = X[selected_features]
-    y = X["Class"]
 
     X["content_length"] = (
         X["content_length"].astype(str).str.extract(r"(\d+)").fillna(0).astype(int)
@@ -140,7 +137,7 @@ def build_features(data):
 
     # Encode categorical features
     categorical_features = ["Method", "host", "cookie", "Accept", "content",
-                            "URL", "classification"]
+                            "URL"]
     le = LabelEncoder()
     for feature in categorical_features:
         X[feature] = le.fit_transform(X[feature].astype(str))
@@ -168,4 +165,4 @@ def build_features(data):
 
     print(f"Features generated: {numeric_features + categorical_features}")
 
-    return X.drop(columns=["Class"]), y, numeric_features, categorical_features
+    return X, y, numeric_features, categorical_features
