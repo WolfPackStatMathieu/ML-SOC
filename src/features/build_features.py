@@ -87,6 +87,8 @@ def build_features(data):
     y = data["classification"]
     X = X[selected_features]
 
+    print(f"Target variable 'y' (classification) avant encodage: {y.unique()}")
+
     X["content_length"] = (
         X["content_length"].astype(str).str.extract(r"(\d+)").fillna(0).astype(int)
     )
@@ -147,6 +149,8 @@ def build_features(data):
 
     # Encode target variable
     y = le.fit_transform(y.astype(str))
+
+    print(f"Target variable 'y' (classification) après encodage: {y}")
 
     # Ensure categorical features are treated as strings for imputation
     for feature in categorical_features:

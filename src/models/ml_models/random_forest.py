@@ -187,6 +187,8 @@ def model_random_forest(data, params):
     print("Colonnes après feature_builder.transform:")
     print(X_transformed.columns)
 
+    print(f"Target variable 'y' après feature_builder.transform: {y}")
+
     # Create ColumnTransformer with the correct features
     preprocessor = ColumnTransformer(
         transformers=[
