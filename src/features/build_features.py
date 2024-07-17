@@ -149,7 +149,8 @@ def build_features(data):
 
     # Encode target variable
     y = le.fit_transform(y.astype(str))
-
+    # Imprimer les classes encodées
+    print("Classes encodées par LabelEncoder:", le.classes_)
     print(f"Target variable 'y' (classification) après encodage: {y}")
 
     # Ensure categorical features are treated as strings for imputation

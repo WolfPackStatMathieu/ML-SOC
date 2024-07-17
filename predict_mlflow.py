@@ -20,7 +20,7 @@ else:
     print("MLflow was not automatically discovered, a tracking URI must be provided manually.")
 
 MODEL_NAME = "random_forest_detection"
-VERSION = 3
+VERSION = 6
 
 model = mlflow.pyfunc.load_model(
     model_uri=f"models:/{MODEL_NAME}/{VERSION}"
@@ -37,6 +37,21 @@ print_with_padding("CHARGEMENT DES DONNEES")
 print_with_padding("READ CSV")
 
 csic_data = load_csv_data(CSIC_FILEPATH)
+
+
+# Extraire les 10 premières et 10 dernières lignes
+first_10_rows = csic_data.head(10)
+last_10_rows = csic_data.tail(10)
+
+# Combiner les lignes
+combined_rows = pd.concat([first_10_rows, last_10_rows])
+
+# Sauvegarder en CSV
+output_filepath = "output/data/csic_first_last_10_rows.csv"
+combined_rows.to_csv(output_filepath, index=False)
+
+print(f"CSV file saved to {output_filepath}")
+
 
 # Vérification des colonnes et types de données
 print("Columns in the dataset: ", csic_data.columns)

@@ -135,15 +135,16 @@ def plot_confusion_matrix(
     predictions (ndarray): Predicted labels by the model.
     labels (list): List of label names for the confusion matrix.
     """
+    # Correctly set labels if not provided
     if labels is None:
         labels = ["Normal", "Anomalous"]
 
     cm = confusion_matrix(y_test, predictions)
-    cm = pd.DataFrame(cm, index=["0", "1"], columns=["0", "1"])
+    cm_df = pd.DataFrame(cm, index=labels, columns=labels)
 
     plt.figure(figsize=(10, 10))
     sns.heatmap(
-        cm,
+        cm_df,
         cmap="Blues",
         linecolor="black",
         linewidth=1,
