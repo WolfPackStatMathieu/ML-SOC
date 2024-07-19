@@ -118,7 +118,9 @@ print_with_padding("RANDOM FOREST")
 print("Colonnes avant l'appel de 'model_random_forest':")
 print(csic_data.columns)
 
-model_random_forest(csic_data, model_params["RandomForestClassifier"])
+for params in model_params["RandomForestClassifier"]:
+    model_random_forest(csic_data, params)
+
 
 print_with_padding("K-NEAREST NEIGHBOR")
 # model_knn(x_tr, y_tr, x_ts, y_ts, model_params["KNeighborsClassifier"])
@@ -148,3 +150,11 @@ print_with_padding("CONVOLUTIONAL NEURAL NETWORK")
 
 print_with_padding("LONG SHORT TERM MEMORY")
 # model_lstm(x_tr, y_tr, x_ts, y_ts, model_params["LSTM"])
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--n_estimators', type=int, required=True, help='Number of estimators Random Forest')
+    parser.add_argument('--max_leaf_nodes', type=int, required=True, help='Maximum leaf nodes Random Forest')
+    args = parser.parse_args()
+    main(args.n_estimators, args.max_leaf_nodes)

@@ -23,26 +23,27 @@ from sklearn.compose import ColumnTransformer
 import joblib
 
 
-def train_random_forest(x_train, y_train, params):
+def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
     """
     Train a Random Forest classifier on the provided training data.
 
     Parameters:
     x_train (DataFrame): Features for training.
     y_train (Series): Target variable for training.
-    params (dict): Hyperparameters for Random Forest.
+    n_estimators (int): Number of trees in the forest.
+    max_leaf_nodes (int): Maximum number of leaf nodes in each tree.
 
     Returns:
     RandomForestClassifier: Trained Random Forest model.
     """
-    random_forest_model = RandomForestClassifier(**params)
+    random_forest_model = RandomForestClassifier(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
     pipe_rf = Pipeline(
         [("classifier", random_forest_model)]
     )
 
     param_grid = {
-        "classifier__n_estimators": [50, 100, 200],
-        "classifier__max_leaf_nodes": [5, 10, 50],
+        "classifier__n_estimators": [n_estimators],
+        "classifier__max_leaf_nodes": [max_leaf_nodes],
     }
 
     pipe_gscv = GridSearchCV(
@@ -220,7 +221,7 @@ def model_random_forest(data, params):
     print("Done!")
 
     start_time = time.time()
-    model = train_random_forest(x_tr, y_tr, params)
+    model = train_random_forest(x_tr, y_tr, params['n_estimators'], params['max_leaf_nodes'])
     end_time = time.time()
     print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_model(model, x_ts, y_ts)

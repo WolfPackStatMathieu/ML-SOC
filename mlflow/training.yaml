@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: titanic-training-workflow-
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      # The MLflow tracking server is responsible to log the hyper-parameter and model metrics.
+      - name: mlflow-tracking-uri
+        value: https://user-mthomassin-argo-workflows.user.lab.sspcloud.fr
+      - name: mlflow-experiment-name
+        value: random_forest_detection
+      - name: model-training-conf-list
+        value: |
+          [
+            { "n_estimators": 50, "max_leaf_nodes": 5 },
+            { "n_estimators": 50, "max_leaf_nodes": 10 },
+            { "n_estimators": 50, "max_leaf_nodes": 50 },
+            { "n_estimators": 100, "max_leaf_nodes": 5 },
+            { "n_estimators": 100, "max_leaf_nodes": 10 },
+            { "n_estimators": 100, "max_leaf_nodes": 50 },
+            { "n_estimators": 200, "max_leaf_nodes": 5 },
+            { "n_estimators": 200, "max_leaf_nodes": 10 },
+            { "n_estimators": 200, "max_leaf_nodes": 50 }
+          ]
+  templates:
+    # Entrypoint DAG template
+    - name: main
+      dag:
+        tasks:
+          # Task 0: Start pipeline
+          - name: start-pipeline
+            template: start-pipeline-wt
+          # Task 1: Train model with given params
+          - name: train-model-with-params
+            dependencies: [ start-pipeline ]
+            template: run-model-training-wt
+            arguments:
+              parameters:
+                - name: n_estimators
+                  value: "{{item.n_estimators}}"
+                - name: max_leaf_nodes
+                  value: "{{item.max_leaf_nodes}}"
+            # Pass the inputs to the task using "withParam"
+            withParam: "{{workflow.parameters.model-training-conf-list}}"
+
+    # Now task container templates are defined
+    # Worker template for task 0 : start-pipeline
+    - name: start-pipeline-wt
+      inputs:
+      container:
+        image: busybox
+        command: [ sh, -c ]
+        args: [ "echo Starting pipeline" ]
+
+    # Worker template for task-1 : train model with params
+    - name: run-model-training-wt
+      inputs:
+        parameters:
+          - name: n_estimators
+          - name: max_leaf_nodes
+      container:
+        image: wolfpackstatmathieu/formation-mlops:main
+        imagePullPolicy: Always
+        command: [sh, -c]
+        args: ["mlflow run .
+                --env-manager=local
+                -P remote_server_uri=$MLFLOW_TRACKING_URI
+                -P experiment_name=$MLFLOW_EXPERIMENT_NAME
+                -P dim={{inputs.parameters.dim}}
+                -P lr={{inputs.parameters.lr}}"]
+        env:
+          - name: MLFLOW_TRACKING_URI
+            value: "{{workflow.parameters.mlflow-tracking-uri}}"
+          - name: MLFLOW_EXPERIMENT_NAME
+            value: "{{workflow.parameters.mlflow-experiment-name}}"
