@@ -4,13 +4,6 @@ FROM inseefrlab/onyxia-python-minimal:py3.10.9
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
 
-# Préparer l'environnement et installer les dépendances
-RUN apt-get clean && apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    curl && \
-    rm -rf /var/lib/apt/lists/*
-
 # Copier le fichier requirements.txt dans le conteneur
 COPY requirements.txt .
 
