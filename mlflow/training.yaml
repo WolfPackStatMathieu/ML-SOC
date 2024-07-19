@@ -3,11 +3,10 @@ kind: Workflow
 metadata:
   generateName: ml-soc-random-forest-training-workflow-
 spec:
-  serviceAccountName: workflow # Ajouter cette ligne pour spécifier le compte de service
+  serviceAccountName: workflow
   entrypoint: main
   arguments:
     parameters:
-      # The MLflow tracking server is responsible to log the hyper-parameter and model metrics.
       - name: mlflow-tracking-uri
         value: https://user-mthomassin-argo-workflows.user.lab.sspcloud.fr
       - name: mlflow-experiment-name
@@ -26,16 +25,13 @@ spec:
             { "n_estimators": 200, "max_leaf_nodes": 50 }
           ]
   templates:
-    # Entrypoint DAG template
     - name: main
       dag:
         tasks:
-          # Task 0: Start pipeline
           - name: start-pipeline
             template: start-pipeline-wt
-          # Task 1: Train model with given params
           - name: train-model-with-params
-            dependencies: [ start-pipeline ]
+            dependencies: [start-pipeline]
             template: run-model-training-wt
             arguments:
               parameters:
@@ -43,19 +39,14 @@ spec:
                   value: "{{item.n_estimators}}"
                 - name: max_leaf_nodes
                   value: "{{item.max_leaf_nodes}}"
-            # Pass the inputs to the task using "withParam"
             withParam: "{{workflow.parameters.model-training-conf-list}}"
 
-    # Now task container templates are defined
-    # Worker template for task 0 : start-pipeline
     - name: start-pipeline-wt
-      inputs:
       container:
         image: busybox
-        command: [ sh, -c ]
-        args: [ "echo Starting pipeline" ]
+        command: [sh, -c]
+        args: ["echo Starting pipeline"]
 
-    # Worker template for task-1 : train model with params
     - name: run-model-training-wt
       inputs:
         parameters:

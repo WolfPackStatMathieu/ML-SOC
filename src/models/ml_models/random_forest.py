@@ -176,7 +176,8 @@ def save_pipeline_to_s3(pipeline):
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
         joblib.dump(pipeline, pipeline_path)
         # Utilisation de mc pour copier le fichier
-        os.system(f"AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
+        cmd = f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl"
+        os.system(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}')
 
 
 
