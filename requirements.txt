@@ -11,4 +11,3 @@ pytest
 pyyaml
 mlflow
 joblib
-tempfile
