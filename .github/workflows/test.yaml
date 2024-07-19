@@ -39,4 +39,4 @@ jobs:
 
       # Étape pour exécuter les tests Python
       - name: Test Python code
-        run: python main.py  # Exécute le script 'main.py' pour tester le code
+        run: python main.py --n_estimators 100 --max_leaf_nodes 10  # Exécute le script 'main.py' avec les arguments nécessaires
