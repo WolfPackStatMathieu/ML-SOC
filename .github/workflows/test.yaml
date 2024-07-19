@@ -7,7 +7,7 @@ on:
       - main
       - dev
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 # Définition des jobs du workflow
 jobs:
@@ -40,3 +40,42 @@ jobs:
       # Étape pour exécuter les tests Python
       - name: Test Python code
         run: python main.py --n_estimators 100 --max_leaf_nodes 10  # Exécute le script 'main.py' avec les arguments nécessaires
+  # Job pour construire et déployer l'image Docker, qui dépend du job 'test'
+  build-and-deploy:
+    needs: test  # S'exécute seulement si le job 'test' réussit
+    runs-on: ubuntu-latest  # Utilise un runner Ubuntu
+
+    steps:
+      # Étape pour vérifier le code source du dépôt
+      - uses: actions/checkout@v4
+
+      # Étape pour configurer QEMU pour l'émulation multi-architecture
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # Étape pour configurer Docker Buildx pour la construction multi-architecture
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Étape pour générer les métadonnées Docker (tags et labels)
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: wolfpackstatmathieu/ml-soc  # Nom de l'image Docker
+
+      # Étape pour se connecter à Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}  # Nom d'utilisateur Docker Hub, stocké dans les secrets GitHub
+          password: ${{ secrets.DOCKERHUB_TOKEN }}  # Mot de passe Docker Hub, stocké dans les secrets GitHub
+
+      # Étape pour construire et pousser l'image Docker vers Docker Hub
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true  # Pousse l'image construite vers Docker Hub
+          tags: wolfpackstatmathieu/ml-soc:1.0.0 #${{ steps.meta.outputs.tags }}  # Utilise les tags générés par l'étape Docker meta
+          labels: ${{ steps.meta.outputs.labels }}  # Utilise les labels générés par l'étape Docker meta
+
