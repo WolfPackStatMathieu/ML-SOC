@@ -217,6 +217,7 @@ def model_random_forest(data, params):
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
         joblib.dump(complete_pipeline, pipeline_path)
         # Si nécessaire, copiez le fichier à un endroit persistant
+        print("sauvegarde du preprocessor")
         os.system(f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
 
 
