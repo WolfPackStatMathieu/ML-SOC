@@ -166,6 +166,21 @@ def plot_confusion_matrix(
     plt.show()
 
 
+def save_pipeline_to_s3(pipeline):
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    aws_session_token = os.getenv('AWS_SESSION_TOKEN')
+    aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
+        joblib.dump(pipeline, pipeline_path)
+        # Utilisation de mc pour copier le fichier
+        os.system(f"AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
+
+
+
+
 def model_random_forest(data, params):
     """
     Train, evaluate, and plot the Random Forest model.
@@ -212,15 +227,8 @@ def model_random_forest(data, params):
     ])
     
     
-    # Utiliser un répertoire temporaire pour sauvegarder le pipeline
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
-        joblib.dump(complete_pipeline, pipeline_path)
-        # Si nécessaire, copiez le fichier à un endroit persistant
-        print("sauvegarde du preprocessor")
-        os.system(f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
-
-
+    # Appel de la fonction dans le script principal
+    save_pipeline_to_s3(complete_pipeline)
 
     # Split the dataset into training and testing sets
     print("Computing train and test split...")
