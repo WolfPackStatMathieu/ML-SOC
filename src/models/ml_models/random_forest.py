@@ -2,6 +2,7 @@ import time
 import os
 import numpy as np
 import pandas as pd
+import tempfile
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.pipeline import Pipeline
@@ -210,8 +211,14 @@ def model_random_forest(data, params):
         ('preprocessor', preprocessor)
     ])
     
-    joblib.dump(complete_pipeline, 'complete_preprocessor_pipeline.pkl')
-    os.system(f"mc cp complete_preprocessor_pipeline.pkl s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
+    
+    # Utiliser un répertoire temporaire pour sauvegarder le pipeline
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
+        joblib.dump(complete_pipeline, pipeline_path)
+        # Si nécessaire, copiez le fichier à un endroit persistant
+        os.system(f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl")
+
 
 
     # Split the dataset into training and testing sets
