@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: titanic-training-workflow-
+  generateName: ml-soc-random-forest-training-workflow-
 spec:
   entrypoint: main
   arguments:
