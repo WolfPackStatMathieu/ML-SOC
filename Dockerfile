@@ -13,8 +13,6 @@ RUN python3 -m pip install --no-cache-dir -r requirements.txt
 # Copier le reste des fichiers de l'application dans le conteneur
 COPY . .
 
-# Créer un répertoire avec les permissions nécessaires
-RUN mkdir -p /ML-SOC/output && chmod -R 777 /ML-SOC/output
 
 # Exposer le port que l'application utilise
 EXPOSE 8000
