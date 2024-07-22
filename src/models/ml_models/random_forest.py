@@ -166,7 +166,7 @@ def plot_confusion_matrix(
         plt.savefig(tmp_file_path)
         plt.show()
 
-        # Upload to S3 using mc
+        # Write the command to a temporary script file
         aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
         aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
         aws_session_token = os.getenv('AWS_SESSION_TOKEN')
@@ -174,9 +174,25 @@ def plot_confusion_matrix(
 
         s3_path = s3_output_path.format(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
         cmd = f"mc cp {tmp_file_path} {s3_path}"
-        full_cmd = f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}'
-        print(f"Running command: {full_cmd}")  # Ajoutez cette ligne pour déboguer
-        os.system(full_cmd)
+        script_content = f"""
+        export AWS_ACCESS_KEY_ID={aws_access_key_id}
+        export AWS_SECRET_ACCESS_KEY={aws_secret_access_key}
+        export AWS_SESSION_TOKEN={aws_session_token}
+        export AWS_DEFAULT_REGION={aws_region}
+        {cmd}
+        """
+
+        script_path = os.path.join(tmpdirname, 'upload_to_s3.sh')
+        with open(script_path, 'w') as script_file:
+            script_file.write(script_content)
+
+        # Make the script executable
+        os.chmod(script_path, 0o755)
+
+        # Execute the script
+        os.system(script_path)
+
+
 
 def save_pipeline_to_s3(pipeline):
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
