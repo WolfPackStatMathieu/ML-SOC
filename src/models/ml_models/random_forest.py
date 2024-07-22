@@ -186,8 +186,14 @@ def model_random_forest(data, params):
     X = preprocessor.fit_transform(X_transformed)
     print(f"Features after preprocessor.transform: {X.shape}")
     print("Colonnes après preprocessor.transform:")
-    print(X.columns if hasattr(X, 'columns') else 'Not a DataFrame')
-    print(type(X))
+    print(f"type(X): {type(X)}")
+
+    if hasattr(X, 'toarray'):
+        X_df = pd.DataFrame(X.toarray())
+        print("Converted sparse matrix to DataFrame:")
+        print(X_df.head())
+    else:
+        print("Data is not a sparse matrix, no conversion performed.")
 
     complete_pipeline = Pipeline(steps=[
         ('feature_builder', feature_builder),

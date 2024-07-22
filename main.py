@@ -18,8 +18,8 @@ def main(n_estimators, max_leaf_nodes):
     print(config)
     model_params = {model: config["models"][model] for model in config["models"]}
     CSIC_FILEPATH = config["data_path"]
-    print(CSIC_FILEPATH)
-    print(model_params["RandomForestClassifier"])
+    print(f"CSIC_FILEPATH: {CSIC_FILEPATH}")
+    print(f'model_params["RandomForestClassifier"]: {model_params["RandomForestClassifier"]}')
     print_with_padding("CHARGEMENT DES DONNEES")
     print_with_padding("READ CSV")
 
@@ -27,11 +27,11 @@ def main(n_estimators, max_leaf_nodes):
     csic_data = csic_data.drop(columns=['Unnamed: 0'], errors='ignore')
     print("Colonnes après suppression de 'Unnamed: 0':")
     print(csic_data.columns)
-    print(csic_data.shape)
+    print(f"csic_data.shape: {csic_data.shape}")
     print_with_padding("MACHINE LEARNING MODELS")
     print_with_padding("RANDOM FOREST")
     print("Colonnes avant l'appel de 'model_random_forest':")
-    print(csic_data.columns)
+    print(f"csic_data.columns: {csic_data.columns}")
 
     # Convertir les arguments en dictionnaire
     params = {
