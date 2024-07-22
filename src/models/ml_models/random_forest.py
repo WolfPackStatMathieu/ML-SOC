@@ -26,7 +26,10 @@ import joblib
 import subprocess
 
 def check_aws_credentials():
-    if not os.getenv('AWS_ACCESS_KEY_ID') or not os.getenv('AWS_SECRET_ACCESS_KEY') or not os.getenv('AWS_SESSION_TOKEN'):
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    aws_session_token = os.getenv('AWS_SESSION_TOKEN')
+    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
         raise EnvironmentError("AWS credentials are not set properly.")
 
 def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
