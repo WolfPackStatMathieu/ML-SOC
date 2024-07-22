@@ -127,15 +127,16 @@ def evaluate_model(model, x_test, y_test):
 
 
 def plot_confusion_matrix(
-    y_test, predictions, labels=None, output_path="output/fig/confusion_matrix_rf.png"
+    y_test, predictions, labels=None, s3_output_path="s3/mthomassin/output/confusion_matrix_rf.png"
 ):
     """
-    Plot the confusion matrix for the model predictions.
+    Plot the confusion matrix for the model predictions and save it to S3.
 
     Parameters:
     y_test (Series): True labels for the test data.
     predictions (ndarray): Predicted labels by the model.
     labels (list): List of label names for the confusion matrix.
+    s3_output_path (str): Path in S3 where the plot will be saved.
     """
     # Correctly set labels if not provided
     if labels is None:
@@ -158,12 +159,21 @@ def plot_confusion_matrix(
     plt.title("Random Forest")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    # Ensure the output directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # Save the plot
-    plt.savefig(output_path)
-    plt.show()
+    # Save the plot to a temporary file and then upload to S3
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        tmp_file_path = os.path.join(tmpdirname, 'confusion_matrix_rf.png')
+        plt.savefig(tmp_file_path)
+        plt.show()
+
+        # Upload to S3 using mc
+        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+        aws_session_token = os.getenv('AWS_SESSION_TOKEN')
+        aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+        cmd = f"mc cp {tmp_file_path} {s3_output_path}"
+        os.system(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}')
 
 
 def save_pipeline_to_s3(pipeline):
