@@ -198,17 +198,6 @@ def model_random_forest(data, params):
     print("Colonnes après preprocessor.transform:")
     print(f"type(X): {type(X)}")
 
-    # Exemple d'utilisation de la conversion de la matrice creuse en DataFrame
-    try:
-        if hasattr(X, 'toarray'):
-            X_df = pd.DataFrame(X.toarray())
-            print("Converted sparse matrix to DataFrame:")
-            print(X_df.head())
-        else:
-            print("Data is not a sparse matrix, no conversion performed.")
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-
     complete_pipeline = Pipeline(steps=[
         ('feature_builder', feature_builder),
         ('preprocessor', preprocessor)
