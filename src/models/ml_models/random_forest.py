@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import tempfile
+import subprocess
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.pipeline import Pipeline
@@ -154,9 +155,18 @@ def save_pipeline_to_s3(pipeline):
     with tempfile.TemporaryDirectory() as tmpdirname:
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
         joblib.dump(pipeline, pipeline_path)
-        cmd = f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl"
+        cmd = [
+            'mc', 'cp', pipeline_path, 's3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl'
+        ]
+        env = os.environ.copy()
+        env.update({
+            'AWS_ACCESS_KEY_ID': aws_access_key_id,
+            'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
+            'AWS_SESSION_TOKEN': aws_session_token,
+            'AWS_DEFAULT_REGION': aws_region
+        })
         try:
-            result = subprocess.run(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             print(result.stdout.decode())
         except subprocess.CalledProcessError as e:
             print(f"Error uploading to S3: {e.stderr.decode()}")
