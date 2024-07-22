@@ -23,14 +23,22 @@ from src.mlflow.mlflow_utils import log_gsvc_to_mlflow
 from src.features.preprocessing import preprocessing_pipeline
 from sklearn.compose import ColumnTransformer
 import joblib
-import subprocess
+
 
 def check_aws_credentials():
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
-    if not aws_access_key_id or not aws_secret_access_key or not aws_session_token:
-        raise EnvironmentError("AWS credentials are not set properly.")
+    aws_region = os.getenv('AWS_DEFAULT_REGION')
+    if not aws_access_key_id:
+        raise EnvironmentError("AWS_ACCESS_KEY_ID is not set.")
+    if not aws_secret_access_key:
+        raise EnvironmentError("AWS_SECRET_ACCESS_KEY is not set.")
+    if not aws_session_token:
+        raise EnvironmentError("AWS_SESSION_TOKEN is not set.")
+    if not aws_region:
+        raise EnvironmentError("AWS_DEFAULT_REGION is not set.")
+
 
 def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
     random_forest_model = RandomForestClassifier(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
@@ -61,6 +69,7 @@ def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
 
     print("Done!")
     return best_model
+
 
 def evaluate_model(model, x_test, y_test):
     predictions = model.predict(x_test)
@@ -104,12 +113,16 @@ def evaluate_model(model, x_test, y_test):
 
     return predictions
 
+
 def upload_to_s3(file_path):
     check_aws_credentials()
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+    if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
+        raise EnvironmentError("One or more AWS credentials are not set properly.")
 
     cmd = f"mc cp {file_path} s3://mthomassin/output/{os.path.basename(file_path)}"
     try:
@@ -118,6 +131,7 @@ def upload_to_s3(file_path):
         print(result.stdout.decode())
     except subprocess.CalledProcessError as e:
         print(f"Error uploading to S3: {e.stderr.decode()}")
+
 
 def plot_confusion_matrix(
     y_test, predictions, labels=None, output_path="output/fig/confusion_matrix_rf.png"
@@ -148,12 +162,16 @@ def plot_confusion_matrix(
 
     upload_to_s3(output_path)
 
+
 def save_pipeline_to_s3(pipeline):
     check_aws_credentials()
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
+
+    if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
+        raise EnvironmentError("One or more AWS credentials are not set properly.")
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
@@ -173,6 +191,7 @@ def save_pipeline_to_s3(pipeline):
             print(result.stdout.decode())
         except subprocess.CalledProcessError as e:
             print(f"Error uploading to S3: {e.stderr.decode()}")
+
 
 def model_random_forest(data, params):
     check_aws_credentials()
