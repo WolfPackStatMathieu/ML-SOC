@@ -54,4 +54,5 @@ if __name__ == "__main__":
     parser.add_argument('--n_estimators', type=int, required=True, help='Number of estimators')
     parser.add_argument('--max_leaf_nodes', type=int, required=True, help='Maximum leaf nodes')
     args = parser.parse_args()
+    print(args)
     main(args.n_estimators, args.max_leaf_nodes)

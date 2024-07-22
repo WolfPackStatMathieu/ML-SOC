@@ -8,7 +8,7 @@ spec:
   arguments:
     parameters:
       - name: mlflow-tracking-uri
-        value: https://user-mthomassin-argo-workflows.user.lab.sspcloud.fr
+        value: user-mthomassin-mlflow.user.lab.sspcloud.fr
       - name: mlflow-experiment-name
         value: random_forest_detection
       - name: model-training-conf-list
