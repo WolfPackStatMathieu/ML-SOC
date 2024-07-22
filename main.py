@@ -42,6 +42,7 @@ def main(n_estimators, max_leaf_nodes):
 
 
 if __name__ == "__main__":
+    import mlflow
     print_with_padding("MLflow Tracking Server")
     if "MLFLOW_TRACKING_URI" in os.environ:
         print(os.environ["MLFLOW_TRACKING_URI"])
