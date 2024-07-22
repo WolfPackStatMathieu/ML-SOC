@@ -27,6 +27,7 @@ import joblib
 
 
 def check_aws_credentials():
+    print("check_aws_credentials")
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
@@ -119,6 +120,7 @@ def evaluate_model(model, x_test, y_test):
 
 
 def upload_to_s3(file_path):
+    print("Start Upload to s3")
     check_aws_credentials()
 
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -126,6 +128,12 @@ def upload_to_s3(file_path):
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
     aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
+
+    print("AWS Access Key ID:", aws_access_key_id)
+    print("AWS Secret Access Key:", aws_secret_access_key)
+    print("AWS Session Token:", aws_session_token)
+    print("AWS Default Region:", aws_region)
+    print("AWS S3 Endpoint:", aws_s3_endpoint)
 
     fs = s3fs.S3FileSystem(
         client_kwargs={'endpoint_url': f'https://{aws_s3_endpoint}'},
