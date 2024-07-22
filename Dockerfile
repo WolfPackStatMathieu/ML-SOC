@@ -4,7 +4,7 @@ FROM inseefrlab/onyxia-python-minimal:py3.10.9
 # Installer MinIO Client
 RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && \
-    mv mc /usr/local/bin/mc
+    mv mc /usr/bin/mc
 
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
