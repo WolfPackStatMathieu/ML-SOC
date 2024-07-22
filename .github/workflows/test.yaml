@@ -43,6 +43,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          AWS_DEFAULT_REGION: "us-east-1"  # Ajoutez cette ligne pour définir la région par défaut
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
         run: python main.py --n_estimators 100 --max_leaf_nodes 10  # Exécute le script 'main.py' avec les arguments nécessaires
   # Job pour construire et déployer l'image Docker, qui dépend du job 'test'
