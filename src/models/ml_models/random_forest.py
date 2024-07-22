@@ -30,6 +30,7 @@ def check_aws_credentials():
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
+    aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
     if not aws_access_key_id:
         raise EnvironmentError("AWS_ACCESS_KEY_ID is not set.")
     if not aws_secret_access_key:
@@ -38,6 +39,8 @@ def check_aws_credentials():
         raise EnvironmentError("AWS_SESSION_TOKEN is not set.")
     if not aws_region:
         raise EnvironmentError("AWS_DEFAULT_REGION is not set.")
+    if not aws_s3_endpoint:
+        raise EnvironmentError("AWS_S3_ENDPOINT is not set.")
 
 
 def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
@@ -116,22 +119,25 @@ def evaluate_model(model, x_test, y_test):
 
 def upload_to_s3(file_path):
     check_aws_credentials()
+    
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
+    aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
 
-    cmd = f"mc cp {file_path} s3/mthomassin/output/{os.path.basename(file_path)}"
+    cmd = f"mc cp {file_path} myminio/mthomassin/output/{os.path.basename(file_path)}"
+    
     env = os.environ.copy()
     env.update({
         'AWS_ACCESS_KEY_ID': aws_access_key_id,
         'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
         'AWS_SESSION_TOKEN': aws_session_token,
         'AWS_DEFAULT_REGION': aws_region,
-        'MC_HOST_myminio': 'https://minio.lab.sspcloud.fr'
+        'MC_HOST_myminio': f"https://{aws_s3_endpoint}"
     })
+
     try:
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         print(result.stdout.decode())
     except subprocess.CalledProcessError as e:
