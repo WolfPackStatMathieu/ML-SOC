@@ -49,6 +49,7 @@ jobs:
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_DEFAULT_REGION: "us-east-1"  # Ajoutez cette ligne pour définir la région par défaut
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+          AWS_S3_ENDPOINT: ${{ secrets.AWS_S3_ENDPOINT }}
         run: python main.py --n_estimators 100 --max_leaf_nodes 10  # Exécute le script 'main.py' avec les arguments nécessaires
   # Job pour construire et déployer l'image Docker, qui dépend du job 'test'
   build-and-deploy:
