@@ -1,10 +1,11 @@
 # Utiliser l'image de base avec Python 3.10.9
 FROM inseefrlab/onyxia-python-minimal:py3.10.9
 
-# Installer MinIO Client
+# Installer MinIO Client dans un répertoire accessible
 RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && \
-    mv mc /usr/bin/mc
+    mv mc /tmp/mc && \
+    ln -s /tmp/mc /usr/local/bin/mc
 
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
