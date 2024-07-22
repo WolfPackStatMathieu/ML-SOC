@@ -42,6 +42,13 @@ def main(n_estimators, max_leaf_nodes):
 
 
 if __name__ == "__main__":
+    print_with_padding("MLflow Tracking Server")
+    if "MLFLOW_TRACKING_URI" in os.environ:
+        print(os.environ["MLFLOW_TRACKING_URI"])
+        mlflow.set_tracking_uri(os.environ["MLFLOW_TRACKING_URI"])
+    else:
+        print("MLflow was not automatically discovered, a tracking URI must be provided manually.")
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--n_estimators', type=int, required=True, help='Number of estimators')
     parser.add_argument('--max_leaf_nodes', type=int, required=True, help='Maximum leaf nodes')
