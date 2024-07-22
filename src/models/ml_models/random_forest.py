@@ -126,21 +126,36 @@ def evaluate_model(model, x_test, y_test):
     return predictions
 
 
+def upload_to_s3(file_path, destination_path):
+    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+    aws_session_token = os.getenv('AWS_SESSION_TOKEN')
+    aws_default_region = os.getenv('AWS_DEFAULT_REGION')
+
+    cmd = (
+        f"AWS_ACCESS_KEY_ID='{aws_access_key_id}' "
+        f"AWS_SECRET_ACCESS_KEY='{aws_secret_access_key}' "
+        f"AWS_SESSION_TOKEN='{aws_session_token}' "
+        f"AWS_DEFAULT_REGION='{aws_default_region}' "
+        f"./upload_to_s3.sh '{file_path}' '{destination_path}'"
+    )
+    os.system(cmd)
+
+
 def plot_confusion_matrix(
-    y_test, predictions, n_estimators, max_leaf_nodes, s3_output_path="s3://mthomassin/output/confusion_matrix_rf_{n_estimators}_{max_leaf_nodes}.png"
+    y_test, predictions, labels=None, output_path="output/fig/confusion_matrix_rf.png"
 ):
     """
-    Plot the confusion matrix for the model predictions and save it to S3.
+    Plot the confusion matrix for the model predictions.
 
     Parameters:
     y_test (Series): True labels for the test data.
     predictions (ndarray): Predicted labels by the model.
-    n_estimators (int): Number of estimators.
-    max_leaf_nodes (int): Maximum number of leaf nodes.
-    s3_output_path (str): Path in S3 where the plot will be saved.
+    labels (list): List of label names for the confusion matrix.
     """
     # Correctly set labels if not provided
-    labels = ["Normal", "Anomalous"]
+    if labels is None:
+        labels = ["Normal", "Anomalous"]
 
     cm = confusion_matrix(y_test, predictions)
     cm_df = pd.DataFrame(cm, index=labels, columns=labels)
@@ -156,41 +171,16 @@ def plot_confusion_matrix(
         xticklabels=labels,
         yticklabels=labels,
     )
-    plt.title(f"Random Forest (n_estimators={n_estimators}, max_leaf_nodes={max_leaf_nodes})")
+    plt.title("Random Forest")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    
-    # Save the plot to a temporary file and then upload to S3
+    # Save the plot to a temporary directory
     with tempfile.TemporaryDirectory() as tmpdirname:
-        tmp_file_path = os.path.join(tmpdirname, f'confusion_matrix_rf_{n_estimators}_{max_leaf_nodes}.png')
-        plt.savefig(tmp_file_path)
+        file_path = os.path.join(tmpdirname, os.path.basename(output_path))
+        plt.savefig(file_path)
         plt.show()
-
-        # Write the command to a temporary script file
-        aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-        aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-        aws_session_token = os.getenv('AWS_SESSION_TOKEN')
-        aws_region = os.getenv('AWS_DEFAULT_REGION')
-
-        s3_path = s3_output_path.format(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
-        cmd = f"mc cp {tmp_file_path} {s3_path}"
-        script_content = f"""
-        export AWS_ACCESS_KEY_ID={aws_access_key_id}
-        export AWS_SECRET_ACCESS_KEY={aws_secret_access_key}
-        export AWS_SESSION_TOKEN={aws_session_token}
-        export AWS_DEFAULT_REGION={aws_region}
-        {cmd}
-        """
-
-        script_path = os.path.join(tmpdirname, 'upload_to_s3.sh')
-        with open(script_path, 'w') as script_file:
-            script_file.write(script_content)
-
-        # Make the script executable
-        os.chmod(script_path, 0o755)
-
-        # Execute the script
-        os.system(script_path)
+        # Upload to S3
+        upload_to_s3(file_path, f"s3://mthomassin/{output_path}")
 
 
 
