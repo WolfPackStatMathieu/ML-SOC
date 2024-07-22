@@ -24,6 +24,7 @@ spec:
             { "n_estimators": 200, "max_leaf_nodes": 10 },
             { "n_estimators": 200, "max_leaf_nodes": 50 }
           ]
+  parallelism: 10  # Add this line to increase the number of parallel pods
   templates:
     - name: main
       dag:
