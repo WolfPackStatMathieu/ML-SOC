@@ -159,7 +159,7 @@ def save_pipeline_to_s3(pipeline):
             result = subprocess.run(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print(result.stdout.decode())
         except subprocess.CalledProcessError as e:
-            print(f"Error uploading to S3: {e.stderr.decode()}')
+            print(f"Error uploading to S3: {e.stderr.decode()}")
 
 def model_random_forest(data, params):
     check_aws_credentials()
