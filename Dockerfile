@@ -5,7 +5,7 @@ FROM inseefrlab/onyxia-python-minimal:py3.10.9
 RUN wget https://dl.min.io/client/mc/release/linux-amd64/mc && \
     chmod +x mc && \
     mv mc /tmp/mc && \
-    ln -s /tmp/mc /usr/local/bin/mc
+    if [ ! -e /usr/local/bin/mc ]; then ln -s /tmp/mc /usr/local/bin/mc; fi
 
 # Définir le répertoire de travail
 WORKDIR /ML-SOC
