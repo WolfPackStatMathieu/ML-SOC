@@ -22,21 +22,13 @@ from src.mlflow.mlflow_utils import log_gsvc_to_mlflow
 from src.features.preprocessing import preprocessing_pipeline
 from sklearn.compose import ColumnTransformer
 import joblib
+import subprocess
 
+def check_aws_credentials():
+    if not os.getenv('AWS_ACCESS_KEY_ID') or not os.getenv('AWS_SECRET_ACCESS_KEY') or not os.getenv('AWS_SESSION_TOKEN'):
+        raise EnvironmentError("AWS credentials are not set properly.")
 
 def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
-    """
-    Train a Random Forest classifier on the provided training data.
-
-    Parameters:
-    x_train (DataFrame): Features for training.
-    y_train (Series): Target variable for training.
-    n_estimators (int): Number of trees in the forest.
-    max_leaf_nodes (int): Maximum number of leaf nodes in each tree.
-
-    Returns:
-    RandomForestClassifier: Trained Random Forest model.
-    """
     random_forest_model = RandomForestClassifier(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
     pipe_rf = Pipeline(
         [("classifier", random_forest_model)]
@@ -58,33 +50,17 @@ def train_random_forest(x_train, y_train, n_estimators, max_leaf_nodes):
     )
     print("Computing....")
 
-    # Fit the model using GridSearchCV
     pipe_gscv.fit(x_train, y_train)
-    # Log results to MLflow
     log_gsvc_to_mlflow(gscv=pipe_gscv, mlflow_experiment_name="random_forest")
 
-    # Evaluate the best model
     best_model = pipe_gscv.best_estimator_
 
     print("Done!")
     return best_model
 
-
 def evaluate_model(model, x_test, y_test):
-    """
-    Evaluate the trained Random Forest model on the test data and print performance metrics.
-
-    Parameters:
-    model (RandomForestClassifier): Trained Random Forest model.
-    x_test (DataFrame): Features for testing.
-    y_test (Series): Target variable for testing.
-
-    Returns:
-    ndarray: Predictions made by the model on the test data.
-    """
     predictions = model.predict(x_test)
 
-    # Évaluer le modèle
     print("MAE:", mean_absolute_error(y_test, predictions))
     print("Accuracy:", accuracy_score(y_test, predictions))
     print(
@@ -114,7 +90,6 @@ def evaluate_model(model, x_test, y_test):
     error_rt = (predictions != y_test).mean()
     print(f"Test error: {error_rt:.1%}")
 
-    # Afficher le rapport de classification
     print(
         classification_report(
             y_test,
@@ -125,35 +100,24 @@ def evaluate_model(model, x_test, y_test):
 
     return predictions
 
-
-def upload_to_s3(file_path, destination_path):
+def upload_to_s3(file_path):
+    check_aws_credentials()
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
-    aws_default_region = os.getenv('AWS_DEFAULT_REGION')
+    aws_region = os.getenv('AWS_DEFAULT_REGION')
 
-    cmd = (
-        f"AWS_ACCESS_KEY_ID='{aws_access_key_id}' "
-        f"AWS_SECRET_ACCESS_KEY='{aws_secret_access_key}' "
-        f"AWS_SESSION_TOKEN='{aws_session_token}' "
-        f"AWS_DEFAULT_REGION='{aws_default_region}' "
-        f"./upload_to_s3.sh '{file_path}' '{destination_path}'"
-    )
-    os.system(cmd)
-
+    cmd = f"mc cp {file_path} s3://mthomassin/output/{os.path.basename(file_path)}"
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        result = subprocess.run(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(result.stdout.decode())
+    except subprocess.CalledProcessError as e:
+        print(f"Error uploading to S3: {e.stderr.decode()}")
 
 def plot_confusion_matrix(
     y_test, predictions, labels=None, output_path="output/fig/confusion_matrix_rf.png"
 ):
-    """
-    Plot the confusion matrix for the model predictions.
-
-    Parameters:
-    y_test (Series): True labels for the test data.
-    predictions (ndarray): Predicted labels by the model.
-    labels (list): List of label names for the confusion matrix.
-    """
-    # Correctly set labels if not provided
     if labels is None:
         labels = ["Normal", "Anomalous"]
 
@@ -174,17 +138,14 @@ def plot_confusion_matrix(
     plt.title("Random Forest")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    # Save the plot to a temporary directory
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        file_path = os.path.join(tmpdirname, os.path.basename(output_path))
-        plt.savefig(file_path)
-        plt.show()
-        # Upload to S3
-        upload_to_s3(file_path, f"s3://mthomassin/{output_path}")
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    plt.savefig(output_path)
+    plt.show()
 
-
+    upload_to_s3(output_path)
 
 def save_pipeline_to_s3(pipeline):
+    check_aws_credentials()
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
@@ -193,28 +154,18 @@ def save_pipeline_to_s3(pipeline):
     with tempfile.TemporaryDirectory() as tmpdirname:
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
         joblib.dump(pipeline, pipeline_path)
-        # Utilisation de mc pour copier le fichier
         cmd = f"mc cp {pipeline_path} s3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl"
-        os.system(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}')
-
-
-
+        try:
+            result = subprocess.run(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(result.stdout.decode())
+        except subprocess.CalledProcessError as e:
+            print(f"Error uploading to S3: {e.stderr.decode()}')
 
 def model_random_forest(data, params):
-    """
-    Train, evaluate, and plot the Random Forest model.
-
-    This function trains a Random Forest classifier on the dataset, evaluates it on the test
-    data, and plots the confusion matrix.
-
-    Parameters:
-    data (pd.DataFrame): The raw data.
-    params (dict): Hyperparameters for Random Forest.
-    """
+    check_aws_credentials()
     print("Building features and preprocessing...")
     preprocessor, numeric_transformer, categorical_transformer = preprocessing_pipeline()
 
-    # Apply feature builder separately
     feature_builder = preprocessor.named_steps['feature_builder']
     X_transformed, y = feature_builder.fit_transform(data)
     print(f"Features after feature_builder.transform: {X_transformed.shape}")
@@ -226,30 +177,24 @@ def model_random_forest(data, params):
 
     print(f"Target variable 'y' après feature_builder.transform: {y}")
 
-    # Create ColumnTransformer with the correct features
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numeric_transformer, feature_builder.numeric_features),
             ('cat', categorical_transformer, feature_builder.categorical_features)
         ])
 
-    # Fit and transform the data with ColumnTransformer
     X = preprocessor.fit_transform(X_transformed)
     print(f"Features after preprocessor.transform: {X.shape}")
     print("Colonnes après preprocessor.transform:")
     print(X.columns if hasattr(X, 'columns') else 'Not a DataFrame')
 
-    # Sauvegarder le pipeline complet de prétraitement (incluant FeatureBuilder et ColumnTransformer)
     complete_pipeline = Pipeline(steps=[
         ('feature_builder', feature_builder),
         ('preprocessor', preprocessor)
     ])
     
-    
-    # Appel de la fonction dans le script principal
     save_pipeline_to_s3(complete_pipeline)
 
-    # Split the dataset into training and testing sets
     print("Computing train and test split...")
     x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
     print(f"Training set shape: {x_tr.shape}, Testing set shape: {x_ts.shape}")
@@ -260,4 +205,4 @@ def model_random_forest(data, params):
     end_time = time.time()
     print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
     predictions = evaluate_model(model, x_ts, y_ts)
-    plot_confusion_matrix(y_ts, predictions, params['n_estimators'], params['max_leaf_nodes'])
+    plot_confusion_matrix(y_ts, predictions, output_path=f"output/fig/confusion_matrix_rf_{params['n_estimators']}_{params['max_leaf_nodes']}.png")
