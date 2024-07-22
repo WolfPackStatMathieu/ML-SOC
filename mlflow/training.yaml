@@ -80,3 +80,5 @@ spec:
               secretKeyRef:
                 name: aws-secret
                 key: aws_session_token
+          - name: MC_HOST_myminio
+            value: "https://minio.lab.sspcloud.fr"
