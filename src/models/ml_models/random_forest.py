@@ -121,19 +121,18 @@ def upload_to_s3(file_path):
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
 
-    if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
-        raise EnvironmentError("One or more AWS credentials are not set properly.")
-
-    # Debugging code (remove this in production)
-    print(f"AWS_ACCESS_KEY_ID: {aws_access_key_id}")
-    print(f"AWS_SECRET_ACCESS_KEY: {aws_secret_access_key}")
-    print(f"AWS_SESSION_TOKEN: {aws_session_token}")
-    print(f"AWS_DEFAULT_REGION: {aws_region}")
-
-    cmd = f"mc cp {file_path} s3://mthomassin/output/{os.path.basename(file_path)}"
+    cmd = f"mc cp {file_path} s3/mthomassin/output/{os.path.basename(file_path)}"
+    env = os.environ.copy()
+    env.update({
+        'AWS_ACCESS_KEY_ID': aws_access_key_id,
+        'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
+        'AWS_SESSION_TOKEN': aws_session_token,
+        'AWS_DEFAULT_REGION': aws_region,
+        'MC_HOST_myminio': 'https://minio.lab.sspcloud.fr'
+    })
     try:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        result = subprocess.run(f"AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         print(result.stdout.decode())
     except subprocess.CalledProcessError as e:
         print(f"Error uploading to S3: {e.stderr.decode()}")
