@@ -174,7 +174,9 @@ def plot_confusion_matrix(
 
         s3_path = s3_output_path.format(n_estimators=n_estimators, max_leaf_nodes=max_leaf_nodes)
         cmd = f"mc cp {tmp_file_path} {s3_path}"
-        os.system(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}')
+        full_cmd = f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}'
+        print(f"Running command: {full_cmd}")  # Ajoutez cette ligne pour déboguer
+        os.system(full_cmd)
 
 def save_pipeline_to_s3(pipeline):
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
