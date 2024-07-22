@@ -124,6 +124,12 @@ def upload_to_s3(file_path):
     if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
         raise EnvironmentError("One or more AWS credentials are not set properly.")
 
+    # Debugging code (remove this in production)
+    print(f"AWS_ACCESS_KEY_ID: {aws_access_key_id}")
+    print(f"AWS_SECRET_ACCESS_KEY: {aws_secret_access_key}")
+    print(f"AWS_SESSION_TOKEN: {aws_session_token}")
+    print(f"AWS_DEFAULT_REGION: {aws_region}")
+
     cmd = f"mc cp {file_path} s3://mthomassin/output/{os.path.basename(file_path)}"
     try:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
