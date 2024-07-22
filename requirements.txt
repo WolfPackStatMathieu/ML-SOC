@@ -9,5 +9,6 @@ xgboost
 scikeras
 pytest
 pyyaml
+s3fs
 mlflow
 joblib

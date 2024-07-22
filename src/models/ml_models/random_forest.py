@@ -1,6 +1,7 @@
 import time
 import os
 import numpy as np
+import s3fs
 import pandas as pd
 import tempfile
 import subprocess
@@ -119,29 +120,26 @@ def evaluate_model(model, x_test, y_test):
 
 def upload_to_s3(file_path):
     check_aws_credentials()
-    
+
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
     aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
 
-    cmd = f"mc cp {file_path} myminio/mthomassin/output/{os.path.basename(file_path)}"
-    
-    env = os.environ.copy()
-    env.update({
-        'AWS_ACCESS_KEY_ID': aws_access_key_id,
-        'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
-        'AWS_SESSION_TOKEN': aws_session_token,
-        'AWS_DEFAULT_REGION': aws_region,
-        'MC_HOST_myminio': f"https://{aws_s3_endpoint}"
-    })
+    fs = s3fs.S3FileSystem(
+        client_kwargs={'endpoint_url': f'https://{aws_s3_endpoint}'},
+        key=aws_access_key_id,
+        secret=aws_secret_access_key,
+        token=aws_session_token
+    )
 
     try:
-        result = subprocess.run(cmd, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-        print(result.stdout.decode())
-    except subprocess.CalledProcessError as e:
-        print(f"Error uploading to S3: {e.stderr.decode()}")
+        with open(file_path, 'rb') as f:
+            fs.put(file_path, f's3://mthomassin/output/{os.path.basename(file_path)}')
+        print(f"Successfully uploaded {file_path} to s3://mthomassin/output/{os.path.basename(file_path)}")
+    except Exception as e:
+        print(f"Error uploading to S3: {str(e)}")
 
 
 def plot_confusion_matrix(
