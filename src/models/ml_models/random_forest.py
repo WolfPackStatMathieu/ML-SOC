@@ -110,7 +110,7 @@ def upload_to_s3(file_path):
     cmd = f"mc cp {file_path} s3://mthomassin/output/{os.path.basename(file_path)}"
     try:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
-        result = subprocess.run(f'AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(f"AWS_ACCESS_KEY_ID={aws_access_key_id} AWS_SECRET_ACCESS_KEY={aws_secret_access_key} AWS_SESSION_TOKEN={aws_session_token} AWS_DEFAULT_REGION={aws_region} {cmd}", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(result.stdout.decode())
     except subprocess.CalledProcessError as e:
         print(f"Error uploading to S3: {e.stderr.decode()}")
@@ -187,6 +187,7 @@ def model_random_forest(data, params):
     print(f"Features after preprocessor.transform: {X.shape}")
     print("Colonnes après preprocessor.transform:")
     print(X.columns if hasattr(X, 'columns') else 'Not a DataFrame')
+    print(type(X))
 
     complete_pipeline = Pipeline(steps=[
         ('feature_builder', feature_builder),
