@@ -31,7 +31,11 @@ jobs:
           python -m pip install --upgrade pip  # Met à jour pip
           pip install -r requirements.txt  # Installe les dépendances à partir du fichier requirements.txt
           pip install pylint  # Installe pylint pour l'analyse statique du code
-
+      - name: Install MinIO Client
+        run: |
+          wget https://dl.min.io/client/mc/release/linux-amd64/mc
+          chmod +x mc
+          sudo mv mc /usr/local/bin/mc
       # Étape pour analyser statiquement le code avec pylint
       - name: Lint
         run: |
