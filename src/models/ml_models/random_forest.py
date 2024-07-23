@@ -1,3 +1,38 @@
+"""
+Ce module contient des fonctions pour entraîner un modèle de forêt aléatoire, évaluer le modèle, 
+et enregistrer les résultats sur AWS S3. Le script utilise MLflow pour le suivi des expériences 
+et intègre diverses étapes de prétraitement des données.
+
+Fonctions incluses :
+- check_aws_credentials : Vérifie la présence des identifiants AWS dans les variables d'environnement.
+- train_random_forest : Entraîne un modèle de forêt aléatoire avec validation croisée et journalise le modèle sur MLflow.
+- evaluate_model : Évalue les performances du modèle sur un jeu de test.
+- upload_to_s3 : Télécharge un fichier local vers un emplacement S3 spécifié.
+- plot_confusion_matrix : Génère et télécharge une matrice de confusion pour les prédictions du modèle.
+- save_pipeline_to_s3 : Enregistre un pipeline de prétraitement sur S3.
+- model_random_forest : Exécute l'ensemble du processus de modélisation pour la forêt aléatoire, de la préparation des données à l'évaluation.
+
+Dépendances :
+    - argparse
+    - os
+    - numpy
+    - s3fs
+    - pandas
+    - tempfile
+    - subprocess
+    - matplotlib.pyplot
+    - seaborn
+    - datetime
+    - sklearn.pipeline
+    - sklearn.model_selection
+    - sklearn.ensemble
+    - sklearn.metrics
+    - src.mlflow.mlflow_utils
+    - src.features.preprocessing
+    - sklearn.compose
+    - joblib
+"""
+
 import time
 import os
 import numpy as np
@@ -28,12 +63,31 @@ import joblib
 
 
 def check_aws_credentials():
+    """
+    Vérifie que les identifiants AWS nécessaires sont définis dans les variables d'environnement.
+
+    Cette fonction vérifie la présence des variables d'environnement suivantes :
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_SESSION_TOKEN
+    - AWS_DEFAULT_REGION
+    - AWS_S3_ENDPOINT
+
+    Si l'une de ces variables n'est pas définie, une erreur d'environnement est levée.
+
+    Raises:
+        EnvironmentError: Si une des variables d'environnement nécessaires n'est pas définie.
+    """
     print("check_aws_credentials")
+    
+    # Récupération des variables d'environnement pour les identifiants AWS
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
     aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
+    
+    # Vérification de chaque variable d'environnement
     if not aws_access_key_id:
         raise EnvironmentError("AWS_ACCESS_KEY_ID is not set.")
     if not aws_secret_access_key:
