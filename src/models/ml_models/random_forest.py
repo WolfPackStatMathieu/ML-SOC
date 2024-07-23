@@ -122,30 +122,24 @@ def evaluate_model(model, x_test, y_test):
 
 def upload_to_s3(file_path):
     check_aws_credentials()
-
-    aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-    aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-    aws_session_token = os.getenv('AWS_SESSION_TOKEN')
-    aws_region = os.getenv('AWS_DEFAULT_REGION')
+    aws_access_key_id = os.getenv('aws_access_key_id_project')  # Clé d'accès publique
+    aws_secret_access_key = os.getenv('aws_secret_access_key_project')  # Clé d'accès secrète
     aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
 
     print("AWS Access Key ID:", aws_access_key_id)
     print("AWS Secret Access Key:", aws_secret_access_key)
-    print("AWS Session Token:", aws_session_token)
-    print("AWS Default Region:", aws_region)
     print("AWS S3 Endpoint:", aws_s3_endpoint)
 
     fs = s3fs.S3FileSystem(
         client_kwargs={'endpoint_url': f'https://{aws_s3_endpoint}'},
         key=aws_access_key_id,
-        secret=aws_secret_access_key,
-        token=aws_session_token
+        secret=aws_secret_access_key
     )
 
     try:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         s3_path = f's3://mthomassin/output/{os.path.basename(file_path).replace(".", f"_{timestamp}.")}'
-        
+        print(f"s3_path: {s3_path}")
         with open(file_path, 'rb') as f:
             fs.put(file_path, s3_path)
         
