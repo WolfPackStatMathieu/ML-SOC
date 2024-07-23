@@ -187,6 +187,7 @@ def save_pipeline_to_s3(pipeline):
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
     aws_region = os.getenv('AWS_DEFAULT_REGION')
+    aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
 
     if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
         raise EnvironmentError("One or more AWS credentials are not set properly.")
@@ -203,8 +204,14 @@ def save_pipeline_to_s3(pipeline):
             'AWS_ACCESS_KEY_ID': aws_access_key_id,
             'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
             'AWS_SESSION_TOKEN': aws_session_token,
-            'AWS_DEFAULT_REGION': aws_region
+            'AWS_DEFAULT_REGION': aws_region,
+            'AWS_S3_ENDPOINT': aws_s3_endpoint
         })
+        print(f"AWS_ACCESS_KEY_ID: {aws_access_key_id}")
+        print(f"AWS_SECRET_ACCESS_KEY: {aws_secret_access_key}")
+        print(f"AWS_SESSION_TOKEN: {aws_session_token}")
+        print(f"AWS_DEFAULT_REGION: {aws_region}")
+        print(f"AWS_S3_ENDPOINT: {aws_s3_endpoint}")
         try:
             result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
             print(result.stdout.decode())
