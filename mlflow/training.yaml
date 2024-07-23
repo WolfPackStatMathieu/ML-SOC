@@ -57,7 +57,9 @@ spec:
             { "n_estimators": 200, "max_leaf_nodes": 5 },
             { "n_estimators": 200, "max_leaf_nodes": 10 },
             { "n_estimators": 200, "max_leaf_nodes": 50 }
-          ]  # Liste des configurations de paramètres pour entraîner le modèle de forêt aléatoire
+          ]  
+          
+    # Liste des configurations de paramètres pour entraîner le modèle de forêt aléatoire
 
   # Définition des templates utilisés dans le workflow
   templates:
