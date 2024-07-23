@@ -21,8 +21,8 @@ def log_gsvc_to_mlflow(gscv, mlflow_experiment_name):
 
     Cette fonction configure le contexte MLflow, enregistre les hyperparamètres
     et les métriques de performance
-    pour chaque combinaison d'hyperparamètres testée, et sauvegarde le modèle
-    entraîné en tant qu'artefact MLflow.
+    pour chaque combinaison d'hyperparamètres testée, et sauvegarde
+    le modèle entraîné en tant qu'artefact MLflow.
     """
     try:
         # Configuration du contexte MLflow avec le nom de l'expérience
@@ -33,31 +33,42 @@ def log_gsvc_to_mlflow(gscv, mlflow_experiment_name):
             # Nom de l'exécution MLflow pour cette combinaison d'hyperparamètres
             run_name = f"run {run_idx}"
             with mlflow.start_run(run_name=run_name):
-                # Enregistrement des hyperparamètres
-                params = gscv.cv_results_["params"][run_idx]
-                for param in params:
-                    mlflow.log_param(param, params[param])
+                try:
+                    # Enregistrement des hyperparamètres
+                    params = gscv.cv_results_["params"][run_idx]
+                    for param in params:
+                        mlflow.log_param(param, params[param])
 
-                # Enregistrement des métriques de performance
-                scores = [
-                    score
-                    for score in gscv.cv_results_
-                    if "mean_test" in score or "std_test" in score
-                ]
-                for score in scores:
-                    mlflow.log_metric(score, gscv.cv_results_[score][run_idx])
+                    # Enregistrement des métriques de performance
+                    scores = [
+                        score
+                        for score in gscv.cv_results_
+                        if "mean_test" in score or "std_test" in score
+                    ]
+                    for score in scores:
+                        mlflow.log_metric(score, gscv.cv_results_[score][run_idx])
 
-                # Enregistrement du modèle en tant qu'artefact
-                mlflow.sklearn.log_model(gscv, "gscv_model")
+                    # Enregistrement du modèle en tant qu'artefact
+                    mlflow.sklearn.log_model(gscv, "gscv_model")
 
-                # Enregistrement de l'URL des données d'entraînement
-                config = load_config()
-                CSIC_FILEPATH = config["data_path"]
-                mlflow.log_param("data_url", CSIC_FILEPATH)
+                    # Enregistrement de l'URL des données d'entraînement
+                    config = load_config()
+                    csic_filepath = config["data_path"]
+                    mlflow.log_param("data_url", csic_filepath)
+
+                except KeyError as e:
+                    # Gestion des exceptions de type KeyError
+                    print(f"KeyError: {e}")
+                except ValueError as e:
+                    # Gestion des exceptions de type ValueError
+                    print(f"ValueError: {e}")
+                except TypeError as e:
+                    # Gestion des exceptions de type TypeError
+                    print(f"TypeError: {e}")
+                except Exception as e:
+                    # Gestion des autres exceptions non spécifiées
+                    print(f"Unexpected Exception: {e}")
 
     except mlflow.exceptions.MlflowException as e:
         # Gestion des exceptions spécifiques à MLflow
         print(f"MLflowException: {e}")
-    except Exception as e:
-        # Gestion des autres exceptions
-        print(f"Exception: {e}")
