@@ -120,7 +120,7 @@ def evaluate_model(model, x_test, y_test):
     return predictions
 
 
-def upload_to_s3(file_path):
+def upload_to_s3(local_path, s3_path):
     check_aws_credentials()
     aws_access_key_id = os.getenv('aws_access_key_id_project')  # Clé d'accès publique
     aws_secret_access_key = os.getenv('aws_secret_access_key_project')  # Clé d'accès secrète
@@ -138,12 +138,12 @@ def upload_to_s3(file_path):
 
     try:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        s3_path = f's3://mthomassin/output/{os.path.basename(file_path).replace(".", f"_{timestamp}.")}'
-        print(f"s3_path: {s3_path}")
-        with open(file_path, 'rb') as f:
-            fs.put(file_path, s3_path)
-        
-        print(f"Successfully uploaded {file_path} to {s3_path}")
+        s3_full_path = f's3://{s3_path.replace(".", f"_{timestamp}.")}'
+
+        with open(local_path, 'rb') as f:
+            fs.put(local_path, s3_full_path)
+
+        print(f"Successfully uploaded {local_path} to {s3_full_path}")
     except Exception as e:
         print(f"Error uploading to S3: {str(e)}")
 
