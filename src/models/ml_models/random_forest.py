@@ -7,6 +7,7 @@ import tempfile
 import subprocess
 import matplotlib.pyplot as plt
 import seaborn as sns
+from datetime import datetime
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
@@ -206,7 +207,8 @@ def save_pipeline_to_s3(pipeline):
         print(f"pipeline_path : {pipeline_path}")
         joblib.dump(pipeline, pipeline_path)
 
-        s3_path = 's3://mthomassin/preprocessor/complete_preprocessor_pipeline.pkl'
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        s3_path = f's3://mthomassin/preprocessor/complete_preprocessor_pipeline_{timestamp}.pkl'
         print(f"Uploading {pipeline_path} to {s3_path}")
         fs.put(pipeline_path, s3_path)
         print("Upload complete")
