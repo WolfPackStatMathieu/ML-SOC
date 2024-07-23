@@ -364,14 +364,29 @@ def save_pipeline_to_s3(pipeline):
         print("Upload complete")
 
 
-
 def model_random_forest(data, params):
+    """
+    Entraîne et évalue un modèle de forêt aléatoire en utilisant les données fournies.
+
+    Args:
+        data (pd.DataFrame): Les données à utiliser pour l'entraînement et le test.
+        params (dict): Les paramètres pour le modèle de forêt aléatoire, y compris 'n_estimators' 
+                       et 'max_leaf_nodes'.
+    """
+    # Vérifie que les identifiants AWS sont définis dans les variables d'environnement
     check_aws_credentials()
+
     print("Building features and preprocessing...")
+
+    # Crée la pipeline de prétraitement des données
     preprocessor, numeric_transformer, categorical_transformer = preprocessing_pipeline()
 
+    # Extrait le constructeur de caractéristiques de la pipeline de prétraitement
     feature_builder = preprocessor.named_steps['feature_builder']
+
+    # Applique le constructeur de caractéristiques aux données pour transformer et extraire les caractéristiques
     X_transformed, y = feature_builder.fit_transform(data)
+    
     print(f"Features after feature_builder.transform: {X_transformed.shape}")
     print(f"Numeric features: {feature_builder.numeric_features}")
     print(f"Categorical features: {feature_builder.categorical_features}")
@@ -381,32 +396,54 @@ def model_random_forest(data, params):
 
     print(f"Target variable 'y' après feature_builder.transform: {y}")
 
+    # Reconfigure le préprocesseur pour inclure les caractéristiques numériques et catégorielles extraites
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', numeric_transformer, feature_builder.numeric_features),
             ('cat', categorical_transformer, feature_builder.categorical_features)
         ])
 
+    # Applique le préprocesseur aux données transformées
     X = preprocessor.fit_transform(X_transformed)
+    
     print(f"Features after preprocessor.transform: {X.shape}")
     print("Colonnes après preprocessor.transform:")
     print(f"type(X): {type(X)}")
 
+    # Crée une pipeline complète incluant le constructeur de caractéristiques et le préprocesseur
     complete_pipeline = Pipeline(steps=[
         ('feature_builder', feature_builder),
         ('preprocessor', preprocessor)
     ])
     
+    # Sauvegarde la pipeline complète dans S3
     save_pipeline_to_s3(complete_pipeline)
 
     print("Computing train and test split...")
+
+    # Sépare les données en ensembles d'entraînement et de test
     x_tr, x_ts, y_tr, y_ts = train_test_split(X, y, test_size=0.3, random_state=0)
+    
     print(f"Training set shape: {x_tr.shape}, Testing set shape: {x_ts.shape}")
     print("Done!")
 
+    # Enregistre le temps de début de l'entraînement du modèle
     start_time = time.time()
+    
+    # Entraîne le modèle de forêt aléatoire en utilisant les ensembles d'entraînement
     model = train_random_forest(x_tr, y_tr, params['n_estimators'], params['max_leaf_nodes'])
+    
+    # Enregistre le temps de fin de l'entraînement du modèle
     end_time = time.time()
+    
     print(f"RANDOM FOREST Execution time: {end_time - start_time:.2f} seconds")
+
+    # Évalue le modèle en utilisant l'ensemble de test
     predictions = evaluate_model(model, x_ts, y_ts)
-    plot_confusion_matrix(y_ts, predictions, output_path=f"output/fig/confusion_matrix_rf_{params['n_estimators']}_{params['max_leaf_nodes']}.png")
+    
+    # Génère et sauvegarde la matrice de confusion
+    plot_confusion_matrix(
+        y_ts, 
+        predictions, 
+        output_path=f"output/fig/confusion_matrix_rf_{params['n_estimators']}_{params['max_leaf_nodes']}.png"
+    )
