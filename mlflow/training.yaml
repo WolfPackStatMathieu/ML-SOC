@@ -1,17 +1,51 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+# Ce module YAML définit un workflow Argo pour l'entraînement d'un modèle de forêt aléatoire
+# (Random Forest) avec différentes configurations de paramètres. Le workflow automatise
+# le processus d'entraînement, de prétraitement des données et d'enregistrement des résultats
+# dans MLflow, tout en utilisant MinIO pour le stockage des artefacts.
+
+# Le workflow comprend les éléments suivants :
+
+# 1. **Arguments du Workflow** :
+#    - `mlflow-tracking-uri` : URI du serveur de tracking MLflow.
+#    - `mlflow-experiment-name` : Nom de l'expérience MLflow pour l'enregistrement des résultats.
+#    - `model-training-conf-list` : Liste de configurations pour entraîner le modèle avec des 
+#      valeurs spécifiques de `n_estimators` et `max_leaf_nodes`.
+
+# 2. **Templates** :
+#    - `main` : Template principal orchestrant les tâches avec un DAG.
+#    - `start-pipeline-wt` : Template démarrant le pipeline avec un message de démarrage.
+#    - `run-model-training-wt` : Template exécutant l'entraînement du modèle en utilisant une 
+#      image Docker spécifique et les paramètres fournis.
+
+# 3. **Tâches** :
+#    - `start-pipeline` : Première tâche du workflow, dépendant de `start-pipeline-wt`.
+#    - `train-model-with-params` : Tâche d'entraînement du modèle, itérant sur les différentes
+#      configurations de `model-training-conf-list`.
+
+# 4. **Variables d'Environnement** :
+#    - Contient les informations pour accéder aux services AWS (clés d'accès, jeton de session, 
+#      région) et pour configurer le point de terminaison S3 pour MinIO.
+
+# Ce workflow permet de gérer efficacement les différentes étapes de l'entraînement du modèle,
+# en assurant la traçabilité des expériences via MLflow et le stockage sécurisé des artefacts
+# via MinIO.
+
+apiVersion: argoproj.io/v1alpha1  # Version de l'API Argo Workflows utilisée pour ce workflow
+kind: Workflow  # Type de ressource définie comme un Workflow
 metadata:
-  generateName: ml-soc-random-forest-training-workflow-
+  generateName: ml-soc-random-forest-training-workflow-  # Préfixe pour le nom généré du workflow
 spec:
-  serviceAccountName: workflow
-  entrypoint: main
+  serviceAccountName: workflow  # Nom du compte de service Kubernetes pour l'exécution du workflow
+  entrypoint: main  # Nom de l'entrée principale (point d'entrée) du workflow, défini plus bas
+
+  # Définition des paramètres passés au workflow
   arguments:
     parameters:
-      - name: mlflow-tracking-uri
-        value: https://user-mthomassin-mlflow.user.lab.sspcloud.fr
-      - name: mlflow-experiment-name
-        value: random_forest_detection
-      - name: model-training-conf-list
+      - name: mlflow-tracking-uri  # URI du serveur de tracking MLflow
+        value: https://user-mthomassin-mlflow.user.lab.sspcloud.fr  # URI pour la traçabilité des expériences MLflow
+      - name: mlflow-experiment-name  # Nom de l'expérience MLflow pour l'entraînement du modèle
+        value: random_forest_detection  # Nom de l'expérience où les résultats seront enregistrés
+      - name: model-training-conf-list  # Liste des configurations de paramètres pour l'entraînement du modèle
         value: |
           [
             { "n_estimators": 50, "max_leaf_nodes": 5 },
@@ -23,75 +57,75 @@ spec:
             { "n_estimators": 200, "max_leaf_nodes": 5 },
             { "n_estimators": 200, "max_leaf_nodes": 10 },
             { "n_estimators": 200, "max_leaf_nodes": 50 }
-          ]
+          ]  # Liste des configurations de paramètres pour entraîner le modèle de forêt aléatoire
+
+  # Définition des templates utilisés dans le workflow
   templates:
-    - name: main
-      dag:
+    - name: main  # Nom du template principal qui orchestre les tâches
+      dag:  # Définition d'un graphe acyclique dirigé (DAG) pour l'exécution des tâches
         tasks:
-          - name: start-pipeline
-            template: start-pipeline-wt
-          - name: train-model-with-params
-            dependencies: [start-pipeline]
-            template: run-model-training-wt
+          - name: start-pipeline  # Nom de la première tâche dans le DAG
+            template: start-pipeline-wt  # Template utilisé pour cette tâche
+          - name: train-model-with-params  # Nom de la tâche suivante dans le DAG
+            dependencies: [start-pipeline]  # Dépend de la tâche 'start-pipeline'
+            template: run-model-training-wt  # Template utilisé pour cette tâche
             arguments:
               parameters:
-                - name: n_estimators
-                  value: "{{item.n_estimators}}"
-                - name: max_leaf_nodes
-                  value: "{{item.max_leaf_nodes}}"
-            withParam: "{{workflow.parameters.model-training-conf-list}}"
+                - name: n_estimators  # Paramètre pour le nombre d'estimateurs du modèle
+                  value: "{{item.n_estimators}}"  # Valeur du paramètre passé à la tâche
+                - name: max_leaf_nodes  # Paramètre pour le nombre maximal de feuilles
+                  value: "{{item.max_leaf_nodes}}"  # Valeur du paramètre passé à la tâche
+            withParam: "{{workflow.parameters.model-training-conf-list}}"  # Liste des paramètres à itérer pour cette tâche
 
-    - name: start-pipeline-wt
+    - name: start-pipeline-wt  # Template pour la tâche de démarrage du pipeline
       container:
-        image: busybox
-        command: [sh, -c]
-        args: ["echo Starting pipeline"]
+        image: busybox  # Image Docker utilisée pour cette tâche
+        command: [sh, -c]  # Commande à exécuter dans le conteneur
+        args: ["echo Starting pipeline"]  # Arguments pour la commande, affiche un message de démarrage
 
-    - name: run-model-training-wt
+    - name: run-model-training-wt  # Template pour la tâche d'entraînement du modèle
       inputs:
         parameters:
-          - name: n_estimators
-          - name: max_leaf_nodes
+          - name: n_estimators  # Paramètre d'entrée pour le nombre d'estimateurs
+          - name: max_leaf_nodes  # Paramètre d'entrée pour le nombre maximal de feuilles
       container:
-        image: wolfpackstatmathieu/ml-soc:1.0.0
-        imagePullPolicy: Always
-        command: [sh, -c]
-        args: ["python main.py --n_estimators {{inputs.parameters.n_estimators}} --max_leaf_nodes {{inputs.parameters.max_leaf_nodes}}"]
-        env:
-          - name: MLFLOW_TRACKING_URI
-            value: "{{workflow.parameters.mlflow-tracking-uri}}"
-          - name: MLFLOW_EXPERIMENT_NAME
-            value: "{{workflow.parameters.mlflow-experiment-name}}"
-          - name: AWS_ACCESS_KEY_ID
+        image: wolfpackstatmathieu/ml-soc:1.0.0  # Image Docker personnalisée pour l'entraînement du modèle
+        imagePullPolicy: Always  # Toujours tirer la dernière version de l'image
+        command: [sh, -c]  # Commande à exécuter dans le conteneur
+        args: ["python main.py --n_estimators {{inputs.parameters.n_estimators}} --max_leaf_nodes {{inputs.parameters.max_leaf_nodes}}"]  # Arguments pour exécuter le script Python
+        env:  # Variables d'environnement pour le conteneur
+          - name: MLFLOW_TRACKING_URI  # URI du serveur MLflow
+            value: "{{workflow.parameters.mlflow-tracking-uri}}"  # Valeur de la variable d'environnement
+          - name: MLFLOW_EXPERIMENT_NAME  # Nom de l'expérience MLflow
+            value: "{{workflow.parameters.mlflow-experiment-name}}"  # Valeur de la variable d'environnement
+          - name: AWS_ACCESS_KEY_ID  # Clé d'accès AWS
             valueFrom:
               secretKeyRef:
-                name: aws-secret
-                key: aws_access_key_id
-          - name: AWS_SECRET_ACCESS_KEY
+                name: aws-secret  # Nom du secret Kubernetes contenant la clé
+                key: aws_access_key_id  # Clé spécifique dans le secret
+          - name: AWS_SECRET_ACCESS_KEY  # Clé secrète AWS
             valueFrom:
               secretKeyRef:
-                name: aws-secret
-                key: aws_secret_access_key
-          - name: AWS_SESSION_TOKEN
+                name: aws-secret  # Nom du secret Kubernetes contenant la clé secrète
+                key: aws_secret_access_key  # Clé spécifique dans le secret
+          - name: AWS_SESSION_TOKEN  # Jeton de session AWS
             valueFrom:
               secretKeyRef:
-                name: aws-secret
-                key: aws_session_token
-          - name: AWS_DEFAULT_REGION
-            value: "us-east-1"
-          - name: AWS_S3_ENDPOINT
-            value: "minio.lab.sspcloud.fr"
-          - name: MC_HOST_myminio
-            value: "https://minio.lab.sspcloud.fr"
-          - name: AWS_ACCESS_KEY_ID_PROJECT
+                name: aws-secret  # Nom du secret Kubernetes contenant le jeton
+                key: aws_session_token  # Clé spécifique dans le secret
+          - name: AWS_DEFAULT_REGION  # Région par défaut AWS
+            value: "us-east-1"  # Valeur de la région AWS
+          - name: AWS_S3_ENDPOINT  # Point de terminaison S3 pour MinIO
+            value: "minio.lab.sspcloud.fr"  # Valeur du point de terminaison
+          - name: MC_HOST_myminio  # Hôte MinIO pour l'accès via MC (MinIO Client)
+            value: "https://minio.lab.sspcloud.fr"  # Valeur de l'hôte MinIO
+          - name: AWS_ACCESS_KEY_ID_PROJECT  # Clé d'accès AWS spécifique au projet
             valueFrom:
               secretKeyRef:
-                name: aws-secret
-                key: aws_access_key_id_project
-          - name: AWS_SECRET_ACCESS_KEY_PROJECT
+                name: aws-secret  # Nom du secret Kubernetes contenant la clé
+                key: aws_access_key_id_project  # Clé spécifique dans le secret
+          - name: AWS_SECRET_ACCESS_KEY_PROJECT  # Clé secrète AWS spécifique au projet
             valueFrom:
               secretKeyRef:
-                name: aws-secret
-                key: aws_secret_access_key_project
-
-
+                name: aws-secret  # Nom du secret Kubernetes contenant la clé secrète
+                key: aws_secret_access_key_project  # Clé spécifique dans le secret

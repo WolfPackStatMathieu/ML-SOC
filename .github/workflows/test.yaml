@@ -1,3 +1,42 @@
+# Ce module YAML définit un pipeline CI/CD pour automatiser les tests, la construction et le déploiement
+# d'une application Python en utilisant GitHub Actions. Le workflow est déclenché par des pushs sur les
+# branches 'main' et 'dev', ainsi que par des tags correspondant à des versions.
+
+# Le pipeline CI/CD comprend les éléments suivants :
+
+# 1. **Déclencheurs** :
+#    - `on.push.branches` : Déclenche le workflow pour les pushs sur les branches 'main' et 'dev'.
+#    - `on.push.tags` : Déclenche le workflow pour les pushs de tags correspondant à des versions (par ex. 'v1.0.0').
+
+# 2. **Jobs** :
+#    - `test` : Job pour tester le code, incluant les étapes suivantes :
+#      - Vérification du code source.
+#      - Configuration de l'environnement Python.
+#      - Installation des dépendances du projet.
+#      - Installation du client MinIO.
+#      - Analyse statique du code avec pylint.
+#      - Exécution des tests Python.
+#    - `build-and-deploy` : Job pour construire et déployer l'image Docker, dépendant du job `test`, incluant les étapes suivantes :
+#      - Vérification du code source.
+#      - Configuration de QEMU pour l'émulation multi-architecture.
+#      - Configuration de Docker Buildx pour la construction multi-architecture.
+#      - Génération des métadonnées Docker (tags et labels).
+#      - Connexion à Docker Hub.
+#      - Construction et poussée de l'image Docker vers Docker Hub.
+
+# Instructions :
+
+# 1. **Configurer les secrets GitHub** :
+#    Assurez-vous que les secrets nécessaires (par ex. `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+#    `AWS_SESSION_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`, `MLFLOW_TRACKING_URI`, `AWS_S3_ENDPOINT`)
+#    sont définis dans les paramètres de votre dépôt GitHub.
+
+# 2. **Personnaliser les valeurs** :
+#    Modifiez les valeurs telles que les versions de Python, les noms des images Docker, et les commandes
+#    de test selon vos besoins spécifiques.
+
+# Ce fichier YAML automatise le processus de test, de construction et de déploiement de l'application,
+# assurant ainsi une intégration et un déploiement continus (CI/CD) de manière sécurisée et efficace.
 name: CI/CD Pipeline
 
 # Déclenche le workflow sur les pushs vers les branches 'main' et 'dev'
@@ -31,11 +70,14 @@ jobs:
           python -m pip install --upgrade pip  # Met à jour pip
           pip install -r requirements.txt  # Installe les dépendances à partir du fichier requirements.txt
           pip install pylint  # Installe pylint pour l'analyse statique du code
+          
+      # Étape pour installer le client MinIO
       - name: Install MinIO Client
         run: |
           wget https://dl.min.io/client/mc/release/linux-amd64/mc
           chmod +x mc
           sudo mv mc /usr/local/bin/mc
+
       # Étape pour analyser statiquement le code avec pylint
       - name: Lint
         run: |
@@ -51,6 +93,7 @@ jobs:
           MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
           AWS_S3_ENDPOINT: ${{ secrets.AWS_S3_ENDPOINT }}
         run: python main.py --n_estimators 100 --max_leaf_nodes 10  # Exécute le script 'main.py' avec les arguments nécessaires
+
   # Job pour construire et déployer l'image Docker, qui dépend du job 'test'
   build-and-deploy:
     needs: test  # S'exécute seulement si le job 'test' réussit
@@ -89,4 +132,3 @@ jobs:
           push: true  # Pousse l'image construite vers Docker Hub
           tags: wolfpackstatmathieu/ml-soc:1.0.0 #${{ steps.meta.outputs.tags }}  # Utilise les tags générés par l'étape Docker meta
           labels: ${{ steps.meta.outputs.labels }}  # Utilise les labels générés par l'étape Docker meta
-
