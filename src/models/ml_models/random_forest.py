@@ -121,7 +121,6 @@ def evaluate_model(model, x_test, y_test):
 
 
 def upload_to_s3(file_path):
-    
     check_aws_credentials()
 
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -144,9 +143,13 @@ def upload_to_s3(file_path):
     )
 
     try:
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        s3_path = f's3://mthomassin/output/{os.path.basename(file_path).replace(".", f"_{timestamp}.")}'
+        
         with open(file_path, 'rb') as f:
-            fs.put(file_path, f's3://mthomassin/output/{os.path.basename(file_path)}')
-        print(f"Successfully uploaded {file_path} to s3://mthomassin/output/{os.path.basename(file_path)}")
+            fs.put(file_path, s3_path)
+        
+        print(f"Successfully uploaded {file_path} to {s3_path}")
     except Exception as e:
         print(f"Error uploading to S3: {str(e)}")
 
