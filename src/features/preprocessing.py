@@ -66,33 +66,40 @@ def build_features(data):
 
 def preprocessing_pipeline():
     """
-    Create a preprocessing pipeline for the dataset.
+    Crée une pipeline de prétraitement pour le jeu de données.
 
     Returns:
-    sklearn.pipeline.Pipeline: A pipeline that preprocesses the dataset.
+    sklearn.pipeline.Pipeline: Une pipeline qui prétraite le jeu de données.
+    tuple: La pipeline de transformation numérique et la pipeline de transformation catégorielle.
     """
+    # Initialise le constructeur de caractéristiques personnalisé
     feature_builder = FeatureBuilder()
     
+    # Crée une pipeline pour les transformations des caractéristiques numériques
     numeric_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='mean')),
-        ('scaler', StandardScaler())
+        ('imputer', SimpleImputer(strategy='mean')),  # Remplace les valeurs manquantes par la moyenne
+        ('scaler', StandardScaler())  # Normalise les caractéristiques numériques
     ])
 
-    # Ensure categorical features are treated as strings for imputation
+    # Crée une pipeline pour les transformations des caractéristiques catégorielles
     categorical_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
-        ('onehot', OneHotEncoder(handle_unknown='ignore'))
+        ('imputer', SimpleImputer(strategy='constant', fill_value='missing')),  # Remplace les valeurs manquantes par 'missing'
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))  # Encode les caractéristiques catégorielles en utilisant l'encodage one-hot
     ])
 
+    # Crée un préprocesseur qui applique les transformations numériques et catégorielles
     preprocessor = ColumnTransformer(
         transformers=[
-            ('num', numeric_transformer, feature_builder.numeric_features),
-            ('cat', categorical_transformer, feature_builder.categorical_features)
+            ('num', numeric_transformer, feature_builder.numeric_features),  # Applique les transformations numériques
+            ('cat', categorical_transformer, feature_builder.categorical_features)  # Applique les transformations catégorielles
         ])
 
+    # Crée une pipeline complète qui inclut le constructeur de caractéristiques et le préprocesseur
     pipeline = Pipeline(steps=[
-        ('feature_builder', feature_builder),
-        ('preprocessor', preprocessor)
+        ('feature_builder', feature_builder),  # Construit les caractéristiques à partir des données brutes
+        ('preprocessor', preprocessor)  # Applique les transformations préprocesseur
     ])
 
+    # Retourne la pipeline complète ainsi que les transformateurs numériques et catégoriels
     return pipeline, numeric_transformer, categorical_transformer
+

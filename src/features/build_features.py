@@ -1,3 +1,15 @@
+"""
+Ce module fournit des utilitaires pour prétraiter et extraire des caractéristiques
+à partir de données brutes, en particulier pour les URL et le contenu textuel.
+
+Fonctions:
+    - build_features: Prétraite et extrait les caractéristiques des données brutes.
+
+Importe les fonctions de:
+    - src.utils.url_utils: Fonctions pour l'extraction de caractéristiques d'URL.
+    - src.utils.content_utils: Fonctions pour l'extraction de caractéristiques de contenu textuel.
+"""
+
 from src.utils.url_utils import (
     count_dot,
     no_of_dir,
@@ -37,21 +49,25 @@ from src.utils.content_utils import (
 )
 from sklearn.preprocessing import LabelEncoder
 
-
 def build_features(data):
     """
-    Preprocess and extract features from the raw data.
+    Prétraite et extrait des caractéristiques à partir des données brutes.
 
     Parameters:
-    data (pd.DataFrame): The raw data.
+    data (pd.DataFrame): Les données brutes.
 
     Returns:
-    pd.DataFrame: The features.
-    pd.Series: The target variable.
+    pd.DataFrame: Les caractéristiques extraites.
+    pd.Series: La variable cible.
+    list: Les caractéristiques numériques.
+    list: Les caractéristiques catégorielles.
     """
 
+    # Affiche les colonnes initiales des données
     print("Colonnes avant la transformation dans 'build_features':")
     print(data.columns)
+
+    # Liste des caractéristiques à extraire des données brutes
     feature_names = [
         "Method",
         "User-Agent",
@@ -70,11 +86,12 @@ def build_features(data):
         "URL",
     ]
 
+    # Sélectionne les colonnes spécifiées et renomme "lenght" en "content_length"
     X = data[feature_names]
     X = X.rename(columns={"lenght": "content_length"})
 
+    # Sélectionne les caractéristiques pertinentes pour l'extraction
     selected_features = [
-
         "Method",
         "host",
         "cookie",
@@ -84,15 +101,19 @@ def build_features(data):
         "URL",
     ]
 
+    # Variable cible
     y = data["classification"]
     X = X[selected_features]
 
+    # Affiche les valeurs uniques de la variable cible avant encodage
     print(f"Target variable 'y' (classification) avant encodage: {y.unique()}")
 
+    # Convertit la colonne "content_length" en entier
     X["content_length"] = (
         X["content_length"].astype(str).str.extract(r"(\d+)").fillna(0).astype(int)
     )
 
+    # Dictionnaire des fonctions d'extraction des caractéristiques d'URL
     url_feature_functions = {
         "count_dot_url": count_dot,
         "count_dir_url": no_of_dir,
@@ -115,12 +136,14 @@ def build_features(data):
         "unusual_character_ratio_url": unusual_character_ratio,
     }
 
+    # Applique chaque fonction d'extraction des caractéristiques d'URL à la colonne "URL"
     for feature, func in url_feature_functions.items():
         X[feature] = X["URL"].apply(func)
 
-    # Convert 'content' column to string to avoid issues with float
+    # Convertit la colonne "content" en chaîne de caractères pour éviter les problèmes avec les types flottants
     X["content"] = X["content"].astype(str)
 
+    # Dictionnaire des fonctions d'extraction des caractéristiques de contenu
     content_feature_functions = {
         "count_dot_content": count_dot_content,
         "count_dir_content": count_dir_content,
@@ -137,27 +160,28 @@ def build_features(data):
         "special_count_content": special_count_content,
     }
 
+    # Applique chaque fonction d'extraction des caractéristiques de contenu à la colonne "content"
     for feature, func in content_feature_functions.items():
         X[feature] = X["content"].apply(lambda x: apply_to_content(x, func))
 
-    # Encode categorical features
-    categorical_features = ["Method", "host", "cookie", "Accept", "content",
-                            "URL"]
+    # Encode les caractéristiques catégorielles
+    categorical_features = ["Method", "host", "cookie", "Accept", "content", "URL"]
     le = LabelEncoder()
     for feature in categorical_features:
         X[feature] = le.fit_transform(X[feature].astype(str))
 
-    # Encode target variable
+    # Encode la variable cible
     y = le.fit_transform(y.astype(str))
-    # Imprimer les classes encodées
+
+    # Affiche les classes encodées
     print("Classes encodées par LabelEncoder:", le.classes_)
     print(f"Target variable 'y' (classification) après encodage: {y}")
 
-    # Ensure categorical features are treated as strings for imputation
+    # Assure que les caractéristiques catégorielles sont traitées comme des chaînes de caractères pour l'imputation
     for feature in categorical_features:
         X[feature] = X[feature].astype(str)
 
-    # Identify the new numeric and categorical features
+    # Identifie les nouvelles caractéristiques numériques et catégorielles
     numeric_features = [
         "content_length", "count_dot_url", "count_dir_url", "count_embed_domain_url",
         "shortening_service_url", "count_http_url", "count%_url", "count?_url", 
@@ -171,6 +195,7 @@ def build_features(data):
         "special_count_content"
     ]
 
+    # Affiche les caractéristiques générées
     print(f"Features generated: {numeric_features + categorical_features}")
     print("Colonnes après transformation dans 'build_features':")
     print(X.columns)
