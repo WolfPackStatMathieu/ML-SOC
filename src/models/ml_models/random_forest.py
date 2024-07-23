@@ -183,40 +183,33 @@ def plot_confusion_matrix(
 def save_pipeline_to_s3(pipeline):
     print("Start save pipeline to s3")
     check_aws_credentials()
+    
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     aws_session_token = os.getenv('AWS_SESSION_TOKEN')
-    aws_region = os.getenv('AWS_DEFAULT_REGION')
     aws_s3_endpoint = os.getenv('AWS_S3_ENDPOINT')
 
-    if None in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]:
-        raise EnvironmentError("One or more AWS credentials are not set properly.")
+    print(f"AWS_ACCESS_KEY_ID: {aws_access_key_id}")
+    print(f"AWS_SECRET_ACCESS_KEY: {aws_secret_access_key}")
+    print(f"AWS_SESSION_TOKEN: {aws_session_token}")
+    print(f"AWS_S3_ENDPOINT: {aws_s3_endpoint}")
+
+    fs = s3fs.S3FileSystem(
+        client_kwargs={'endpoint_url': f'https://{aws_s3_endpoint}'},
+        key=aws_access_key_id,
+        secret=aws_secret_access_key,
+        token=aws_session_token
+    )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
         print(f"pipeline_path : {pipeline_path}")
         joblib.dump(pipeline, pipeline_path)
-        cmd = [
-            'mc', 'cp', pipeline_path, 's3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl'
-        ]
-        env = os.environ.copy()
-        env.update({
-            'AWS_ACCESS_KEY_ID': aws_access_key_id,
-            'AWS_SECRET_ACCESS_KEY': aws_secret_access_key,
-            'AWS_SESSION_TOKEN': aws_session_token,
-            'AWS_DEFAULT_REGION': aws_region,
-            'AWS_S3_ENDPOINT': aws_s3_endpoint
-        })
-        print(f"AWS_ACCESS_KEY_ID: {aws_access_key_id}")
-        print(f"AWS_SECRET_ACCESS_KEY: {aws_secret_access_key}")
-        print(f"AWS_SESSION_TOKEN: {aws_session_token}")
-        print(f"AWS_DEFAULT_REGION: {aws_region}")
-        print(f"AWS_S3_ENDPOINT: {aws_s3_endpoint}")
-        try:
-            result = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-            print(result.stdout.decode())
-        except subprocess.CalledProcessError as e:
-            print(f"Error uploading to S3: {e.stderr.decode()}")
+
+        s3_path = 's3://mthomassin/preprocessor/complete_preprocessor_pipeline.pkl'
+        print(f"Uploading {pipeline_path} to {s3_path}")
+        fs.put(pipeline_path, s3_path)
+        print("Upload complete")
 
 
 def model_random_forest(data, params):
