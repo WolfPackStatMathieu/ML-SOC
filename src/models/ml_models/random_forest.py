@@ -120,7 +120,7 @@ def evaluate_model(model, x_test, y_test):
 
 
 def upload_to_s3(file_path):
-    print("Start Upload to s3")
+    
     check_aws_credentials()
 
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
@@ -181,6 +181,7 @@ def plot_confusion_matrix(
 
 
 def save_pipeline_to_s3(pipeline):
+    print("Start save pipeline to s3")
     check_aws_credentials()
     aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -192,6 +193,7 @@ def save_pipeline_to_s3(pipeline):
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         pipeline_path = os.path.join(tmpdirname, 'complete_preprocessor_pipeline.pkl')
+        print(f"pipeline_path : {pipeline_path}")
         joblib.dump(pipeline, pipeline_path)
         cmd = [
             'mc', 'cp', pipeline_path, 's3/mthomassin/preprocessor/complete_preprocessor_pipeline.pkl'
