@@ -171,11 +171,12 @@ def plot_confusion_matrix(
     plt.title("Random Forest")
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    plt.savefig(output_path)
-    plt.show()
-
-    upload_to_s3(output_path)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        temp_output_path = os.path.join(tmpdirname, "confusion_matrix_rf.png")
+        plt.savefig(temp_output_path)
+        plt.show()
+        print(f"Confusion matrix output_path: {output_path}")
+        upload_to_s3(temp_output_path, output_path)
 
 
 def save_pipeline_to_s3(pipeline):
