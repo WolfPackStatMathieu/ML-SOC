@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import random
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, Conv1D, MaxPooling1D, Flatten, Dense, Dropout
@@ -8,11 +7,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import LabelEncoder
-
-# Fixer le seed pour NumPy, TensorFlow et les opérations aléatoires
-np.random.seed(42)
-tf.random.set_seed(42)
-random.seed(42)
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # Charger le dataset CSIC depuis un fichier CSV
 csic_data = pd.read_csv('csic_database.csv')
@@ -21,9 +16,7 @@ csic_data = pd.read_csv('csic_database.csv')
 def preprocess_data(data):
     # Combiner les colonnes pertinentes en une seule chaîne de texte
     http_requests = data[['Method', 'User-Agent', 'Pragma', 'Cache-Control', 'Accept', 
-                          'Accept-encoding', 'cookie', 
-                          #'connection','host','language','Accept-charset',
-                          'content-type', 'URL']].fillna('').apply(lambda x: ' '.join(x), axis=1)
+                          'Accept-encoding', 'cookie', 'content-type', 'URL']].fillna('').apply(lambda x: ' '.join(x), axis=1)
     
     # Encoder les étiquettes de classification
     label_encoder = LabelEncoder()
@@ -73,6 +66,9 @@ def create_cnn_model(input_length):
 # Initialiser la validation croisée en 5 plis
 kf = KFold(n_splits=5)
 accuracies = []  # Liste pour stocker les précisions de chaque pli
+precisions = []  # Liste pour stocker les précisions (precision) de chaque pli
+recalls = []  # Liste pour stocker les rappels (recall) de chaque pli
+f1_scores = []  # Liste pour stocker les scores F1 de chaque pli
 
 # Boucle sur chaque pli de la validation croisée
 for train_index, test_index in kf.split(data):
@@ -85,9 +81,21 @@ for train_index, test_index in kf.split(data):
     
     model.fit(X_train, y_train, batch_size=batch_size, epochs=10, validation_split=0.2)  # Entraîner le modèle avec les données d'entraînement
     
-    loss, accuracy = model.evaluate(X_test, y_test)  # Évaluer le modèle avec les données de test
+    y_pred = np.argmax(model.predict(X_test), axis=1)  # Prédire les étiquettes pour les données de test
+    accuracy = accuracy_score(y_test, y_pred)  # Calculer la précision
+    precision = precision_score(y_test, y_pred)  # Calculer la précision (precision)
+    recall = recall_score(y_test, y_pred)  # Calculer le rappel (recall)
+    f1 = f1_score(y_test, y_pred)  # Calculer le score F1
+    
     accuracies.append(accuracy)  # Stocker la précision de chaque pli dans la liste accuracies
-    print(f'Fold accuracy: {accuracy}')  # Imprimer la précision de chaque pli
+    precisions.append(precision)  # Stocker la précision (precision) de chaque pli dans la liste precisions
+    recalls.append(recall)  # Stocker le rappel (recall) de chaque pli dans la liste recalls
+    f1_scores.append(f1)  # Stocker le score F1 de chaque pli dans la liste f1_scores
+    
+    print(f'Fold accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1-score: {f1}')
 
-# Après la boucle, imprimer la précision moyenne et l'écart-type des précisions
+# Après la boucle, imprimer les métriques moyennes et leurs écarts-types
 print(f'Mean accuracy: {np.mean(accuracies)}, Standard Deviation: {np.std(accuracies)}')
+print(f'Mean precision: {np.mean(precisions)}, Standard Deviation: {np.std(precisions)}')
+print(f'Mean recall: {np.mean(recalls)}, Standard Deviation: {np.std(recalls)}')
+print(f'Mean F1-score: {np.mean(f1_scores)}, Standard Deviation: {np.std(f1_scores)}')
